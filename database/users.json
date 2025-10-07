@@ -1,0 +1,56 @@
+[
+  {
+    "id": "user001",
+    "username": "spice_lover_nara",
+    "email": "spice.lover@example.com",
+    "displayName": "スパイス愛好家",
+    "preferences": {
+      "spiceParameters": {
+        "spiciness": 80,
+        "stimulation": 75,
+        "aroma": 90
+      },
+      "favoriteShops": ["4", "2"],
+      "dislikes": ["5"]
+    },
+    "bio": "奈良でスパイスカレーを食べ歩いています。刺激的で香り豊かなカレーが大好きです！",
+    "createdAt": "2024-01-15T09:00:00Z",
+    "isPublic": true
+  },
+  {
+    "id": "user002", 
+    "username": "mild_curry_fan",
+    "email": "mild.curry@example.com",
+    "displayName": "まろやかカレー派",
+    "preferences": {
+      "spiceParameters": {
+        "spiciness": 30,
+        "stimulation": 25,
+        "aroma": 85
+      },
+      "favoriteShops": ["5", "1"],
+      "dislikes": ["4"]
+    },
+    "bio": "優しい味のカレーが好みです。香りを重視して店選びをしています。",
+    "createdAt": "2024-02-20T14:30:00Z",
+    "isPublic": true
+  },
+  {
+    "id": "user003",
+    "username": "balanced_spice",
+    "email": "balanced@example.com", 
+    "displayName": "バランス重視",
+    "preferences": {
+      "spiceParameters": {
+        "spiciness": 55,
+        "stimulation": 60,
+        "aroma": 75
+      },
+      "favoriteShops": ["3", "6", "7"],
+      "dislikes": []
+    },
+    "bio": "バランスの取れたスパイス使いのお店を探しています。新しいお店の開拓も大好きです。",
+    "createdAt": "2024-03-10T11:15:00Z",
+    "isPublic": true
+  }
+]

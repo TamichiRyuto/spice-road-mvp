@@ -1,0 +1,106 @@
+.spice-chart {
+  border-radius: 8px;
+  background-color: rgba(255, 248, 237, 0.8);
+  border: 1px solid rgba(139, 69, 19, 0.2);
+}
+
+.spice-chart-title {
+  font-weight: 700;
+  color: #8b4513;
+  text-align: center;
+}
+
+.spice-chart-item {
+  display: flex;
+  align-items: center;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.spice-chart-item:hover {
+  transform: translateY(-1px);
+}
+
+.spice-chart-item.heat {
+  background-color: rgba(211, 47, 47, 0.1);
+  border: 1px solid rgba(211, 47, 47, 0.3);
+}
+
+.spice-chart-item.heat:hover {
+  background-color: rgba(211, 47, 47, 0.2);
+  box-shadow: 0 2px 8px rgba(211, 47, 47, 0.2);
+}
+
+.spice-chart-item.stimulation {
+  background-color: rgba(255, 152, 0, 0.1);
+  border: 1px solid rgba(255, 152, 0, 0.3);
+}
+
+.spice-chart-item.stimulation:hover {
+  background-color: rgba(255, 152, 0, 0.2);
+  box-shadow: 0 2px 8px rgba(255, 152, 0, 0.2);
+}
+
+.spice-chart-item.aroma {
+  background-color: rgba(76, 175, 80, 0.1);
+  border: 1px solid rgba(76, 175, 80, 0.3);
+}
+
+.spice-chart-item.aroma:hover {
+  background-color: rgba(76, 175, 80, 0.2);
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.2);
+}
+
+.spice-chart-icon {
+  flex-shrink: 0;
+}
+
+.spice-chart-icon.heat {
+  color: #d32f2f;
+}
+
+.spice-chart-icon.stimulation {
+  color: #ff9800;
+}
+
+.spice-chart-icon.aroma {
+  color: #4caf50;
+}
+
+.spice-chart-label {
+  font-weight: 700;
+  color: #2d1810;
+}
+
+.spice-chart-bar-bg {
+  width: 100%;
+  background-color: rgba(139, 69, 19, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+}
+
+.spice-chart-bar {
+  height: 100%;
+  border-radius: 8px;
+  transition: width 0.8s ease-out;
+}
+
+.spice-chart-bar.heat {
+  background: linear-gradient(90deg, #d32f2f, #d32f2fdd);
+}
+
+.spice-chart-bar.stimulation {
+  background: linear-gradient(90deg, #ff9800, #ff9800dd);
+}
+
+.spice-chart-bar.aroma {
+  background: linear-gradient(90deg, #4caf50, #4caf50dd);
+}
+
+.spice-chart-description {
+  color: #666;
+  font-size: 0.7rem;
+  margin-top: 4px;
+  display: block;
+}
