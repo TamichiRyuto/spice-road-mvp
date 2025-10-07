@@ -1,0 +1,123 @@
+services:
+  # Nginx Web Server (Reverse Proxy with HTTP/2)
+  nginx:
+    image: nginx:alpine
+    container_name: spice-curry-nginx
+    ports:
+      - "10080:80"
+      - "10443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - ./nginx/swagger-ui.html:/usr/share/nginx/html/swagger-ui.html:ro
+      - ./cpp-api/openapi.yaml:/etc/nginx/openapi/openapi.yaml:ro
+      - ./database:/usr/share/nginx/html/data:ro
+    depends_on:
+      - cpp-api
+      - frontend
+    restart: unless-stopped
+    networks:
+      - spice-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "--no-check-certificate", "https://localhost:443/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Modern C++26 API Server (Backend API Only)
+  cpp-api:
+    build:
+      context: ./cpp-api
+      # dockerfile: Dockerfile.gcc15
+    container_name: spice-curry-cpp26-api
+    expose:
+      - "8080"
+    environment:
+      - API_PORT=8080
+      - LOG_LEVEL=info
+      - ENABLE_METRICS=true
+    volumes:
+      - ./cpp-api:/app
+      - ./database:/app/database:ro
+    working_dir: /app
+    command: >
+      bash -c "
+        echo '🍛 Building Spice Curry C++26 API Server...' &&
+        cd build &&
+        cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_STANDARD=26 -G Ninja &&
+        ninja spice_curry_api_server &&
+        echo '🚀 Starting C++26 API Server on port 8080...' &&
+        ./spice_curry_api_server
+      "
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    restart: unless-stopped
+    networks:
+      - spice-network
+
+  # React Frontend
+  frontend:
+    build: ./frontend
+    container_name: spice-curry-frontend
+    expose:
+      - "3000"
+    environment:
+      # API requests will go through nginx
+      - REACT_APP_API_URL=/api
+      - REACT_APP_GOOGLE_MAPS_API_KEY=DEMO_API_KEY
+      - CHOKIDAR_USEPOLLING=true
+    stdin_open: true
+    tty: true
+    restart: unless-stopped
+    networks:
+      - spice-network
+
+  # Static JSON Database Server
+  database:
+    image: nginx:alpine
+    container_name: spice-curry-database
+    ports:
+      - "9000:80"
+    volumes:
+      - ./database:/usr/share/nginx/html:ro
+    command: >
+      sh -c "echo '📁 Static JSON database served at http://localhost:9000/shops.json' &&
+             nginx -g 'daemon off;'"
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/shops.json"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+    networks:
+      - spice-network
+
+  # Redis for caching (optional)
+  redis:
+    image: redis:7-alpine
+    container_name: spice-curry-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+    networks:
+      - spice-network
+
+volumes:
+  redis-data:
+    driver: local
+
+networks:
+  spice-network:
+    driver: bridge

@@ -1,0 +1,30 @@
+{
+  "short_name": "スパイスロードNara",
+  "name": "スパイスロードNara - 多次元スパイス分析による評価システム",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "logo192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "logo512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#d2691e",
+  "background_color": "#faf7f2",
+  "description": "奈良のスパイスカレー店を多次元スパイス分析で評価・検索できるWebアプリケーション",
+  "categories": ["food", "lifestyle", "entertainment"],
+  "lang": "ja",
+  "orientation": "any",
+  "prefer_related_applications": false
+}

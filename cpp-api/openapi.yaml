@@ -1,0 +1,459 @@
+openapi: 3.0.3
+info:
+  title: Spice Curry Nara API
+  description: |
+    REST API for Spice Curry shop information system in Nara.
+    Multi-dimensional spice parameter analysis system.
+  version: 1.0.0
+  contact:
+    name: Spice Road Nara Team
+  license:
+    name: MIT
+
+servers:
+  - url: https://localhost/api
+    description: Production server
+  - url: http://localhost:8080/api
+    description: Development server
+
+tags:
+  - name: shops
+    description: Curry shop operations
+  - name: users
+    description: User management operations
+  - name: health
+    description: Health check and monitoring
+
+paths:
+  /health:
+    get:
+      tags:
+        - health
+      summary: Health check endpoint
+      description: Returns the health status of the API server
+      operationId: getHealth
+      responses:
+        '200':
+          description: Server is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /metrics:
+    get:
+      tags:
+        - health
+      summary: Get API metrics
+      description: Returns information about the API implementation
+      operationId: getMetrics
+      responses:
+        '200':
+          description: Metrics data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetricsResponse'
+
+  /shops:
+    get:
+      tags:
+        - shops
+      summary: Get all curry shops
+      description: Returns a list of all curry shops with their spice parameters
+      operationId: getShops
+      parameters:
+        - name: region
+          in: query
+          description: Filter shops by region
+          required: false
+          schema:
+            type: string
+        - name: minRating
+          in: query
+          description: Filter shops by minimum rating
+          required: false
+          schema:
+            type: number
+            format: double
+            minimum: 0
+            maximum: 5
+      responses:
+        '200':
+          description: List of curry shops
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Shop'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /shops/{shopId}:
+    get:
+      tags:
+        - shops
+      summary: Get a specific curry shop
+      description: Returns details of a specific curry shop by ID
+      operationId: getShopById
+      parameters:
+        - name: shopId
+          in: path
+          description: Shop ID
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Shop details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Shop'
+        '404':
+          description: Shop not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /users:
+    get:
+      tags:
+        - users
+      summary: Get all users
+      description: Returns a list of all registered users
+      operationId: getUsers
+      responses:
+        '200':
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    post:
+      tags:
+        - users
+      summary: Register a new user
+      description: Creates a new user registration
+      operationId: registerUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRegistration'
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /users/{userId}:
+    get:
+      tags:
+        - users
+      summary: Get a specific user
+      description: Returns details of a specific user by ID
+      operationId: getUserById
+      parameters:
+        - name: userId
+          in: path
+          description: User ID
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    SpiceParameters:
+      type: object
+      description: Multi-dimensional spice analysis parameters
+      required:
+        - spiciness
+        - stimulation
+        - aroma
+      properties:
+        spiciness:
+          type: integer
+          description: Spiciness level (0-100)
+          minimum: 0
+          maximum: 100
+          example: 60
+        stimulation:
+          type: integer
+          description: Stimulation level (0-100)
+          minimum: 0
+          maximum: 100
+          example: 45
+        aroma:
+          type: integer
+          description: Aroma level (0-100)
+          minimum: 0
+          maximum: 100
+          example: 85
+
+    Shop:
+      type: object
+      required:
+        - id
+        - name
+        - address
+        - latitude
+        - longitude
+        - spiceParameters
+        - rating
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the shop
+          example: "1"
+        name:
+          type: string
+          description: Shop name
+          example: "菩薩咖喱"
+        address:
+          type: string
+          description: Shop address
+          example: "奈良県奈良市薬師堂町21"
+        phone:
+          type: string
+          description: Phone number
+          example: "0742-26-3131"
+        description:
+          type: string
+          description: Shop description
+          example: "奈良市初のダルバート専門店"
+        latitude:
+          type: number
+          format: double
+          description: Latitude coordinate
+          example: 34.6775
+        longitude:
+          type: number
+          format: double
+          description: Longitude coordinate
+          example: 135.8328
+        spiceParameters:
+          $ref: '#/components/schemas/SpiceParameters'
+        rating:
+          type: number
+          format: double
+          description: Shop rating (0-5)
+          minimum: 0
+          maximum: 5
+          example: 4.6
+        imageUrl:
+          type: string
+          description: Shop image URL
+          example: "https://example.com/image.jpg"
+        region:
+          type: string
+          description: Region name
+          example: "ならまち"
+
+    User:
+      type: object
+      required:
+        - id
+        - username
+        - email
+        - displayName
+        - spiceParameters
+        - isPublic
+        - createdAt
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the user
+          example: "user-001"
+        username:
+          type: string
+          description: Username
+          example: "spice_lover"
+        email:
+          type: string
+          format: email
+          description: Email address
+          example: "user@example.com"
+        displayName:
+          type: string
+          description: Display name
+          example: "スパイス太郎"
+        spiceParameters:
+          $ref: '#/components/schemas/SpiceParameters'
+        preferredSpiceLevel:
+          type: string
+          description: Preferred spice level
+          example: "medium"
+        favoriteShopIds:
+          type: array
+          items:
+            type: string
+          description: List of favorite shop IDs
+          example: ["1", "2"]
+        visitedShopIds:
+          type: array
+          items:
+            type: string
+          description: List of visited shop IDs
+          example: ["1", "2", "3"]
+        isPublic:
+          type: boolean
+          description: Whether the profile is public
+          example: true
+        createdAt:
+          type: string
+          format: date-time
+          description: Account creation timestamp
+          example: "2024-01-01T00:00:00Z"
+
+    UserRegistration:
+      type: object
+      required:
+        - username
+        - email
+        - displayName
+        - spiceParameters
+      properties:
+        username:
+          type: string
+          minLength: 3
+          maxLength: 50
+          description: Username
+          example: "spice_lover"
+        email:
+          type: string
+          format: email
+          description: Email address
+          example: "user@example.com"
+        displayName:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Display name
+          example: "スパイス太郎"
+        spiceParameters:
+          $ref: '#/components/schemas/SpiceParameters'
+        preferredSpiceLevel:
+          type: string
+          description: Preferred spice level
+          example: "medium"
+        isPublic:
+          type: boolean
+          description: Whether the profile is public
+          default: true
+
+    HealthResponse:
+      type: object
+      required:
+        - status
+        - message
+        - timestamp
+      properties:
+        status:
+          type: string
+          enum: [OK, ERROR]
+          description: Health status
+          example: "OK"
+        message:
+          type: string
+          description: Status message
+          example: "Spice Curry C++26 API Server with stdexec"
+        timestamp:
+          type: string
+          format: date-time
+          description: Response timestamp
+          example: "2024-01-01T00:00:00Z"
+
+    MetricsResponse:
+      type: object
+      required:
+        - api
+        - stdexec
+        - async
+        - architecture
+      properties:
+        api:
+          type: string
+          description: API implementation language
+          example: "C++26"
+        stdexec:
+          type: string
+          description: stdexec status
+          example: "active"
+        async:
+          type: string
+          description: Async model
+          example: "sender-receiver"
+        architecture:
+          type: string
+          description: Architecture pattern
+          example: "clean"
+
+    Error:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: Error message
+          example: "Resource not found"
+        code:
+          type: string
+          description: Error code
+          example: "NOT_FOUND"

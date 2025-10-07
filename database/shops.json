@@ -1,0 +1,752 @@
+[
+  {
+    "id": "1",
+    "name": "菩薩咖喱",
+    "address": "奈良県奈良市薬師堂町21",
+    "latitude": 34.6775,
+    "longitude": 135.8328,
+    "region": "奈良市",
+    "spiceParameters": {
+      "spiciness": 60,
+      "stimulation": 45,
+      "aroma": 85
+    },
+    "rating": 4.6,
+    "description": "奈良市初のダルバート専門店。御霊神社すぐ東の古民家で野菜たっぷりのスパイスカレーを提供"
+  },
+  {
+    "id": "2",
+    "name": "ハチノス",
+    "address": "奈良県奈良市南市町8-1 古古古屋1階",
+    "latitude": 34.6755,
+    "longitude": 135.8312,
+    "spiceParameters": {
+      "spiciness": 70,
+      "stimulation": 75,
+      "aroma": 80
+    },
+    "rating": 4.4,
+    "description": "ならまちの薬膳スパイススープカレーと蜂蜜の店。身体に優しいスパイス使いが評判",
+    "region": "奈良市"
+  },
+  {
+    "id": "3",
+    "name": "サルマメ咖喱",
+    "address": "奈良県奈良市法蓮町1232",
+    "latitude": 34.6892,
+    "longitude": 135.8247,
+    "spiceParameters": {
+      "spiciness": 50,
+      "stimulation": 55,
+      "aroma": 75
+    },
+    "rating": 4.3,
+    "description": "きたまちの古民家カレー店。出汁・塩・発酵を大切にしたおいしくて嬉しいスパイスカレー",
+    "region": "奈良市"
+  },
+  {
+    "id": "4",
+    "name": "スパイスカレー SAMA",
+    "address": "奈良県奈良市餅飯殿町38-1",
+    "latitude": 34.6808,
+    "longitude": 135.8295,
+    "spiceParameters": {
+      "spiciness": 80,
+      "stimulation": 85,
+      "aroma": 70
+    },
+    "rating": 4.2,
+    "description": "餅飯殿商店街の本格スパイスカレー店。こだわりのスパイスブレンドで刺激的な一皿を",
+    "region": "奈良市"
+  },
+  {
+    "id": "5",
+    "name": "咖喱食堂 心",
+    "address": "奈良県奈良市高畑町1071-1",
+    "latitude": 34.6715,
+    "longitude": 135.8385,
+    "spiceParameters": {
+      "spiciness": 40,
+      "stimulation": 30,
+      "aroma": 90
+    },
+    "rating": 4.5,
+    "description": "春日大社参道近くの隠れ家カレー店。心を込めて作る香り豊かなスパイスカレー",
+    "region": "奈良市"
+  },
+  {
+    "id": "6",
+    "name": "nana curry",
+    "address": "奈良県奈良市勝南院町5",
+    "latitude": 34.6742,
+    "longitude": 135.8348,
+    "spiceParameters": {
+      "spiciness": 60,
+      "stimulation": 65,
+      "aroma": 80
+    },
+    "rating": 4.3,
+    "description": "ならまちエリアの人気カレー店。バランスの取れたスパイス使いで幅広い層に愛される",
+    "region": "奈良市"
+  },
+  {
+    "id": "7",
+    "name": "若草カレー本舗",
+    "address": "奈良県奈良市餅飯殿町38-1",
+    "latitude": 34.6851,
+    "longitude": 135.805,
+    "spiceParameters": {
+      "spiciness": 55,
+      "stimulation": 50,
+      "aroma": 75
+    },
+    "rating": 4.2,
+    "description": "近鉄奈良駅から徒歩3分のもちいどのセンター街にある人気のカレー店。ほうれん草やトマトなど野菜たっぷりのヘルシーなカレーが自慢",
+    "region": "奈良市"
+  },
+  {
+    "id": "8",
+    "name": "森のレストラン ラッキーガーデン",
+    "address": "奈良県生駒市鬼取町168",
+    "latitude": 34.6955,
+    "longitude": 135.6985,
+    "spiceParameters": {
+      "spiciness": 70,
+      "stimulation": 65,
+      "aroma": 85
+    },
+    "rating": 4.4,
+    "description": "生駒山中腹の絶景スリランカ料理店。ミシュランビブグルマン選出の本格スパイスカレー。",
+    "region": "生駒市"
+  },
+  {
+    "id": "9",
+    "name": "カレイヤー",
+    "address": "奈良県生駒市元町1-3-22 アクタスビル1F",
+    "latitude": 34.691,
+    "longitude": 135.7,
+    "spiceParameters": {
+      "spiciness": 75,
+      "stimulation": 80,
+      "aroma": 90
+    },
+    "rating": 4.3,
+    "description": "元心斎橋の名店が生駒に移転。メタル好き店主による創作スパイスカレー専門店。",
+    "region": "生駒市"
+  },
+  {
+    "id": "10",
+    "name": "ルンビニ 生駒店",
+    "address": "奈良県生駒市辻町385",
+    "latitude": 34.692,
+    "longitude": 135.701,
+    "spiceParameters": {
+      "spiciness": 60,
+      "stimulation": 55,
+      "aroma": 75
+    },
+    "rating": 4.1,
+    "description": "本場シェフが作る日本人向けインドカレー。ナン食べ放題が人気。",
+    "region": "生駒市"
+  },
+  {
+    "id": "11",
+    "name": "PUJA 葛本店",
+    "address": "奈良県橿原市葛本町708-1",
+    "latitude": 34.5045,
+    "longitude": 135.793,
+    "spiceParameters": {
+      "spiciness": 65,
+      "stimulation": 60,
+      "aroma": 80
+    },
+    "rating": 4.2,
+    "description": "インド人シェフによる本格カレー。日本人の口に合う味付けが評判。",
+    "region": "橿原市"
+  },
+  {
+    "id": "12",
+    "name": "PUJA 法隆寺店",
+    "address": "奈良県生駒郡斑鳩町法隆寺東2-1-32",
+    "latitude": 34.6135,
+    "longitude": 135.7345,
+    "spiceParameters": {
+      "spiciness": 65,
+      "stimulation": 60,
+      "aroma": 80
+    },
+    "rating": 4.2,
+    "description": "法隆寺近くの本格インド料理店。焼きたてナンと濃厚カレーが自慢。",
+    "region": "生駒郡"
+  },
+  {
+    "id": "13",
+    "name": "エベレスト 大和郡山店",
+    "address": "奈良県大和郡山市筒井町897-1",
+    "latitude": 34.649,
+    "longitude": 135.7865,
+    "spiceParameters": {
+      "spiciness": 70,
+      "stimulation": 70,
+      "aroma": 85
+    },
+    "rating": 4.3,
+    "description": "インド5つ星ホテル直伝のカレー。本格スパイスと炭火焼きが人気。",
+    "region": "大和郡山市"
+  },
+  {
+    "id": "14",
+    "name": "ガネーシュ 田原本店",
+    "address": "奈良県磯城郡田原本町阪手623-1",
+    "latitude": 34.5565,
+    "longitude": 135.7945,
+    "spiceParameters": {
+      "spiciness": 60,
+      "stimulation": 55,
+      "aroma": 75
+    },
+    "rating": 4.1,
+    "description": "リーズナブルで美味しいナンカレー。厳選スパイスの豊かな香りが特徴。",
+    "region": "磯城郡"
+  },
+  {
+    "id": "15",
+    "name": "tabi tabi",
+    "address": "奈良県大和郡山市矢田町通1-1",
+    "latitude": 34.65,
+    "longitude": 135.78,
+    "spiceParameters": {
+      "spiciness": 35,
+      "stimulation": 40,
+      "aroma": 70
+    },
+    "rating": 4,
+    "description": "築90年古民家の辛くないスパイスカレー。5種類のカレーを合盛りで楽しめる。",
+    "region": "大和郡山市"
+  },
+  {
+    "id": "16",
+    "name": "カレー専門店 横浜 王寺店",
+    "address": "奈良県北葛城郡王寺町王寺2-7-23",
+    "latitude": 34.5965,
+    "longitude": 135.7135,
+    "spiceParameters": {
+      "spiciness": 50,
+      "stimulation": 55,
+      "aroma": 65
+    },
+    "rating": 4.5,
+    "description": "大人のホロ苦欧風スパイシーカレー。昔ながらの欧風カレーが味わえる名店。",
+    "region": "北葛城郡"
+  },
+  {
+    "id": "17",
+    "name": "インド料理 アーユルベーダ 西大寺店",
+    "address": "奈良県奈良市西大寺栄町3-20",
+    "latitude": 34.691,
+    "longitude": 135.78,
+    "spiceParameters": {
+      "spiciness": 65,
+      "stimulation": 65,
+      "aroma": 80
+    },
+    "rating": 4.2,
+    "description": "本格北インド料理とタンドール料理。健康志向のアーユルベーダカレー。",
+    "region": "奈良市"
+  },
+  {
+    "id": "18",
+    "name": "カレーハウス CoCo壱番屋 生駒店",
+    "address": "奈良県生駒市俵口町451-1",
+    "latitude": 34.689,
+    "longitude": 135.702,
+    "spiceParameters": {
+      "spiciness": 45,
+      "stimulation": 40,
+      "aroma": 50
+    },
+    "rating": 4,
+    "description": "全国チェーンの定番カレー。辛さ調整可能で家族連れにも人気。",
+    "region": "生駒市"
+  },
+  {
+    "id": "19",
+    "name": "ビストロ カフェ ドゥ パリ",
+    "address": "奈良県橿原市久米町652-2",
+    "latitude": 34.4985,
+    "longitude": 135.7925,
+    "spiceParameters": {
+      "spiciness": 40,
+      "stimulation": 45,
+      "aroma": 70
+    },
+    "rating": 4.3,
+    "description": "フレンチビストロのこだわり欧風カレー。上品な味わいが特徴。",
+    "region": "橿原市"
+  },
+  {
+    "id": "20",
+    "name": "インド料理 マハラジャ 天理店",
+    "address": "奈良県天理市川原城町803-1",
+    "latitude": 34.5965,
+    "longitude": 135.8385,
+    "spiceParameters": {
+      "spiciness": 70,
+      "stimulation": 70,
+      "aroma": 85
+    },
+    "rating": 4.4,
+    "description": "本格インド宮廷料理とタンドールカレー。高級感のある味わい。",
+    "region": "天理市"
+  },
+  {
+    "id": "21",
+    "name": "スパイス食堂 カリカ",
+    "address": "奈良県桜井市桜井934-5",
+    "latitude": 34.5145,
+    "longitude": 135.8435,
+    "spiceParameters": {
+      "spiciness": 50,
+      "stimulation": 45,
+      "aroma": 75
+    },
+    "rating": 4.1,
+    "description": "地元野菜を使った創作スパイスカレー。優しい辛さで食べやすい。",
+    "region": "桜井市"
+  },
+  {
+    "id": "22",
+    "name": "カフェレストラン シャンティ",
+    "address": "奈良県大和高田市片塩町12-5",
+    "latitude": 34.5145,
+    "longitude": 135.7385,
+    "spiceParameters": {
+      "spiciness": 35,
+      "stimulation": 30,
+      "aroma": 65
+    },
+    "rating": 4,
+    "description": "落ち着いた雰囲気のカフェカレー。女性に人気の優しい味付け。",
+    "region": "大和高田市"
+  },
+  {
+    "id": "23",
+    "name": "インド・ネパール料理 ヒマラヤ",
+    "address": "奈良県五條市今井1-2-48",
+    "latitude": 34.3525,
+    "longitude": 135.6965,
+    "spiceParameters": {
+      "spiciness": 65,
+      "stimulation": 60,
+      "aroma": 80
+    },
+    "rating": 4.2,
+    "description": "五條市の本格ネパール料理店。モモと濃厚カレーが自慢。",
+    "region": "五條市"
+  },
+  {
+    "id": "24",
+    "name": "カレーキッチン サクラ",
+    "address": "奈良県桜井市阿部645-1",
+    "latitude": 34.52,
+    "longitude": 135.85,
+    "spiceParameters": {
+      "spiciness": 45,
+      "stimulation": 40,
+      "aroma": 60
+    },
+    "rating": 4.1,
+    "description": "手作りにこだわる家庭的なカレー専門店。地元で愛される老舗。",
+    "region": "桜井市"
+  },
+  {
+    "id": "25",
+    "name": "タージマハル 橿原店",
+    "address": "奈良県橿原市内膳町1-4-12",
+    "latitude": 34.5,
+    "longitude": 135.795,
+    "spiceParameters": {
+      "spiciness": 70,
+      "stimulation": 65,
+      "aroma": 85
+    },
+    "rating": 4.3,
+    "description": "老舗インド料理チェーン。伝統的な調理法による本格カレー。",
+    "region": "橿原市"
+  },
+  {
+    "id": "26",
+    "name": "カフェ・ド・カレー",
+    "address": "奈良県生駒市北新町10-36",
+    "latitude": 34.6925,
+    "longitude": 135.7015,
+    "spiceParameters": {
+      "spiciness": 55,
+      "stimulation": 50,
+      "aroma": 75
+    },
+    "rating": 4.2,
+    "description": "生駒の隠れ家カフェ。こだわりのスパイスブレンドが評判。",
+    "region": "生駒市"
+  },
+  {
+    "id": "27",
+    "name": "スパイスガーデン ムンバイ",
+    "address": "奈良県大和郡山市小泉町2145-3",
+    "latitude": 34.644,
+    "longitude": 135.789,
+    "spiceParameters": {
+      "spiciness": 75,
+      "stimulation": 70,
+      "aroma": 85
+    },
+    "rating": 4.4,
+    "description": "南インド料理専門店。ココナッツベースの濃厚カレーが人気。",
+    "region": "大和郡山市"
+  },
+  {
+    "id": "28",
+    "name": "カレーハウス サンタナ",
+    "address": "奈良県天理市嘉幡町1-8",
+    "latitude": 34.598,
+    "longitude": 135.84,
+    "spiceParameters": {
+      "spiciness": 40,
+      "stimulation": 35,
+      "aroma": 55
+    },
+    "rating": 4,
+    "description": "天理の老舗カレー店。昔ながらの洋食店風カレーライス。",
+    "region": "天理市"
+  },
+  {
+    "id": "29",
+    "name": "インド家庭料理 ラジ",
+    "address": "奈良県橿原市白橿町8-21-5",
+    "latitude": 34.488,
+    "longitude": 135.798,
+    "spiceParameters": {
+      "spiciness": 50,
+      "stimulation": 45,
+      "aroma": 70
+    },
+    "rating": 4.1,
+    "description": "家庭的なインド料理。優しい辛さで子供から大人まで楽しめる。",
+    "region": "橿原市"
+  },
+  {
+    "id": "30",
+    "name": "カレー工房 ナマステ",
+    "address": "奈良県桜井市慈恩寺472-1",
+    "latitude": 34.53,
+    "longitude": 135.855,
+    "spiceParameters": {
+      "spiciness": 65,
+      "stimulation": 60,
+      "aroma": 80
+    },
+    "rating": 4.2,
+    "description": "桜井の本格インドカレー工房。手作りナンと豊富なカレー種類。",
+    "region": "桜井市"
+  },
+  {
+    "id": "31",
+    "name": "レストラン カシミール",
+    "address": "奈良県大和高田市大中98-4",
+    "latitude": 34.51,
+    "longitude": 135.74,
+    "spiceParameters": {
+      "spiciness": 80,
+      "stimulation": 75,
+      "aroma": 90
+    },
+    "rating": 4.3,
+    "description": "本格パキスタン料理。香辛料の効いた濃厚なカレーが自慢。",
+    "region": "大和高田市"
+  },
+  {
+    "id": "32",
+    "name": "カフェレストラン スパイス",
+    "address": "奈良県生駒市真弓1-12-5",
+    "latitude": 34.7,
+    "longitude": 135.695,
+    "spiceParameters": {
+      "spiciness": 60,
+      "stimulation": 55,
+      "aroma": 75
+    },
+    "rating": 4.1,
+    "description": "生駒の住宅街にある隠れ家カフェ。創作スパイスカレーが人気。",
+    "region": "生駒市"
+  },
+  {
+    "id": "33",
+    "name": "インド料理 シタール",
+    "address": "奈良県五條市五條3-2-11",
+    "latitude": 34.35,
+    "longitude": 135.695,
+    "spiceParameters": {
+      "spiciness": 70,
+      "stimulation": 65,
+      "aroma": 85
+    },
+    "rating": 4.2,
+    "description": "五條市の老舗インド料理店。伝統的なタンドール料理とカレー。",
+    "region": "五條市"
+  },
+  {
+    "id": "34",
+    "name": "カレーレストラン ボンベイ",
+    "address": "奈良県大和郡山市今国府町165-2",
+    "latitude": 34.642,
+    "longitude": 135.782,
+    "spiceParameters": {
+      "spiciness": 65,
+      "stimulation": 60,
+      "aroma": 80
+    },
+    "rating": 4.2,
+    "description": "大和郡山の本格インドカレー。豊富なメニューと本格的な味。",
+    "region": "大和郡山市"
+  },
+  {
+    "id": "35",
+    "name": "スパイス厨房 カルダモン",
+    "address": "奈良県天理市田井庄町588-1",
+    "latitude": 34.592,
+    "longitude": 135.845,
+    "spiceParameters": {
+      "spiciness": 75,
+      "stimulation": 70,
+      "aroma": 85
+    },
+    "rating": 4.3,
+    "description": "天理のスパイス専門カレー店。こだわりのスパイスブレンドが評判。",
+    "region": "天理市"
+  },
+  {
+    "id": "36",
+    "name": "カレーショップ アジャンタ",
+    "address": "奈良県橿原市飯高町145-8",
+    "latitude": 34.495,
+    "longitude": 135.8,
+    "spiceParameters": {
+      "spiciness": 60,
+      "stimulation": 55,
+      "aroma": 75
+    },
+    "rating": 4.1,
+    "description": "橿原の老舗カレー店。インドとネパールの融合料理が楽しめる。",
+    "region": "橿原市"
+  },
+  {
+    "id": "37",
+    "name": "レストラン サフラン",
+    "address": "奈良県桜井市河合町692-3",
+    "latitude": 34.525,
+    "longitude": 135.86,
+    "spiceParameters": {
+      "spiciness": 70,
+      "stimulation": 70,
+      "aroma": 85
+    },
+    "rating": 4.4,
+    "description": "桜井の高級インド料理店。上質なスパイスと丁寧な調理が自慢。",
+    "region": "桜井市"
+  },
+  {
+    "id": "38",
+    "name": "カレーハウス デリー",
+    "address": "奈良県大和高田市築山325-1",
+    "latitude": 34.508,
+    "longitude": 135.735,
+    "spiceParameters": {
+      "spiciness": 55,
+      "stimulation": 50,
+      "aroma": 75
+    },
+    "rating": 4.1,
+    "description": "大和高田の本格インドカレー。バターチキンカレーが特に人気。",
+    "region": "大和高田市"
+  },
+  {
+    "id": "39",
+    "name": "インド料理 ガンジス",
+    "address": "奈良県生駒市山崎新町2-37",
+    "latitude": 34.698,
+    "longitude": 135.71,
+    "spiceParameters": {
+      "spiciness": 70,
+      "stimulation": 65,
+      "aroma": 80
+    },
+    "rating": 4.2,
+    "description": "生駒の本格インド料理店。本場シェフによる伝統的なカレー。",
+    "region": "生駒市"
+  },
+  {
+    "id": "40",
+    "name": "スパイスカリー ラッサム",
+    "address": "奈良県大和郡山市額田部南町235-4",
+    "latitude": 34.638,
+    "longitude": 135.775,
+    "spiceParameters": {
+      "spiciness": 80,
+      "stimulation": 75,
+      "aroma": 90
+    },
+    "rating": 4.3,
+    "description": "南インド風スパイスカレー専門店。ラッサムとドーサも人気。",
+    "region": "大和郡山市"
+  },
+  {
+    "id": "41",
+    "name": "カレーレストラン マドラス",
+    "address": "奈良県天理市富堂町325-2",
+    "latitude": 34.59,
+    "longitude": 135.838,
+    "spiceParameters": {
+      "spiciness": 75,
+      "stimulation": 70,
+      "aroma": 85
+    },
+    "rating": 4.2,
+    "description": "天理の南インド料理専門店。本格的なミールスが味わえる。",
+    "region": "天理市"
+  },
+  {
+    "id": "42",
+    "name": "インド家庭料理 アンナプルナ",
+    "address": "奈良県橿原市曽我町1234-5",
+    "latitude": 34.492,
+    "longitude": 135.805,
+    "spiceParameters": {
+      "spiciness": 50,
+      "stimulation": 45,
+      "aroma": 70
+    },
+    "rating": 4.1,
+    "description": "橿原の家庭的インド料理店。優しい味付けで地元に愛される。",
+    "region": "橿原市"
+  },
+  {
+    "id": "43",
+    "name": "カレー専門店 ビリヤニハウス",
+    "address": "奈良県桜井市粟殿1056-2",
+    "latitude": 34.518,
+    "longitude": 135.852,
+    "spiceParameters": {
+      "spiciness": 65,
+      "stimulation": 60,
+      "aroma": 85
+    },
+    "rating": 4.3,
+    "description": "桜井のビリヤニ専門店。本格的な炊き込みカレーライス。",
+    "region": "桜井市"
+  },
+  {
+    "id": "44",
+    "name": "スパイスキッチン コチン",
+    "address": "奈良県大和高田市昭和町8-15",
+    "latitude": 34.512,
+    "longitude": 135.742,
+    "spiceParameters": {
+      "spiciness": 70,
+      "stimulation": 65,
+      "aroma": 80
+    },
+    "rating": 4.2,
+    "description": "南インドケララ州料理専門店。ココナッツカレーが絶品。",
+    "region": "大和高田市"
+  },
+  {
+    "id": "45",
+    "name": "カフェ&カレー ニューデリー",
+    "address": "奈良県生駒市本町9-18",
+    "latitude": 34.6915,
+    "longitude": 135.7005,
+    "spiceParameters": {
+      "spiciness": 50,
+      "stimulation": 45,
+      "aroma": 70
+    },
+    "rating": 4,
+    "description": "生駒駅前のカフェスタイルカレー店。コーヒーとカレーの組み合わせが人気。",
+    "region": "生駒市"
+  },
+  {
+    "id": "46",
+    "name": "インド料理 チャンドニー",
+    "address": "奈良県五條市住川町845-3",
+    "latitude": 34.348,
+    "longitude": 135.702,
+    "spiceParameters": {
+      "spiciness": 65,
+      "stimulation": 60,
+      "aroma": 85
+    },
+    "rating": 4.2,
+    "description": "五條の老舗インド料理店。宮廷料理風の上品なカレーが自慢。",
+    "region": "五條市"
+  },
+  {
+    "id": "47",
+    "name": "カレーハウス プルニマ",
+    "address": "奈良県大和郡山市田中町518-7",
+    "latitude": 34.646,
+    "longitude": 135.784,
+    "spiceParameters": {
+      "spiciness": 70,
+      "stimulation": 65,
+      "aroma": 80
+    },
+    "rating": 4.1,
+    "description": "大和郡山の隠れ家カレー店。手作りにこだわる本格インドカレー。",
+    "region": "大和郡山市"
+  },
+  {
+    "id": "48",
+    "name": "スパイス酒場 カレー道",
+    "address": "奈良県天理市前栽町456-2",
+    "latitude": 34.595,
+    "longitude": 135.842,
+    "spiceParameters": {
+      "spiciness": 80,
+      "stimulation": 85,
+      "aroma": 85
+    },
+    "rating": 4.3,
+    "description": "天理の創作カレー居酒屋。お酒に合うスパイシーなカレーが評判。",
+    "region": "天理市"
+  },
+  {
+    "id": "49",
+    "name": "カレーレストラン ラージ",
+    "address": "奈良県橿原市石川町312-1",
+    "latitude": 34.498,
+    "longitude": 135.79,
+    "spiceParameters": {
+      "spiciness": 60,
+      "stimulation": 55,
+      "aroma": 75
+    },
+    "rating": 4.1,
+    "description": "橿原の本格インドカレー。豊富なベジタリアンメニューも魅力。",
+    "region": "橿原市"
+  },
+  {
+    "id": "50",
+    "name": "インド・ネパール料理 シェルパ",
+    "address": "奈良県桜井市大福234-6",
+    "latitude": 34.522,
+    "longitude": 135.848,
+    "spiceParameters": {
+      "spiciness": 65,
+      "stimulation": 60,
+      "aroma": 80
+    },
+    "rating": 4.2,
+    "description": "桜井のネパール料理専門店。ダルバートと濃厚カレーが人気。",
+    "region": "桜井市"
+  }
+]
