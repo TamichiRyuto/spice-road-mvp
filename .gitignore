@@ -110,3 +110,6 @@ htmlcov/
 .parcel-cache/
 .next/
 .nuxt/
+
+# Secret key
+nginx/ssl/

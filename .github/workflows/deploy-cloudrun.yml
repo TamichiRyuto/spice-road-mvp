@@ -1,0 +1,128 @@
+name: Deploy to Google Cloud Run
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  REGION: asia-northeast1
+  CPP_API_SERVICE: spice-road-cpp-api
+  NGINX_SERVICE: spice-road-nginx
+
+jobs:
+  deploy-cpp-api:
+    name: Deploy C++ API to Cloud Run
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker for GCR
+        run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev
+
+      - name: Build and Push C++ API Docker Image
+        run: |
+          IMAGE_NAME="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/spice-road/${{ env.CPP_API_SERVICE }}:${{ github.sha }}"
+          docker build -f cpp-api/Dockerfile.production -t $IMAGE_NAME ./cpp-api
+          docker push $IMAGE_NAME
+          echo "CPP_API_IMAGE=$IMAGE_NAME" >> $GITHUB_ENV
+
+      - name: Deploy C++ API to Cloud Run
+        run: |
+          gcloud run deploy ${{ env.CPP_API_SERVICE }} \
+            --image ${{ env.CPP_API_IMAGE }} \
+            --region ${{ env.REGION }} \
+            --platform managed \
+            --allow-unauthenticated \
+            --memory 2Gi \
+            --cpu 2 \
+            --max-instances 10 \
+            --min-instances 0 \
+            --port 8080 \
+            --set-env-vars "API_PORT=8080,LOG_LEVEL=info,ENABLE_METRICS=true" \
+            --timeout 300
+
+      - name: Get C++ API URL
+        id: get-cpp-api-url
+        run: |
+          CPP_API_URL=$(gcloud run services describe ${{ env.CPP_API_SERVICE }} \
+            --region ${{ env.REGION }} \
+            --format 'value(status.url)')
+          echo "CPP_API_URL=$CPP_API_URL" >> $GITHUB_OUTPUT
+          echo "C++ API deployed at: $CPP_API_URL"
+
+    outputs:
+      cpp_api_url: ${{ steps.get-cpp-api-url.outputs.CPP_API_URL }}
+
+  deploy-nginx:
+    name: Deploy Nginx Gateway to Cloud Run
+    runs-on: ubuntu-latest
+    needs: deploy-cpp-api
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker for GCR
+        run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev
+
+      - name: Build and Push Nginx Docker Image
+        run: |
+          IMAGE_NAME="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/spice-road/${{ env.NGINX_SERVICE }}:${{ github.sha }}"
+          docker build -t $IMAGE_NAME ./nginx
+          docker push $IMAGE_NAME
+          echo "NGINX_IMAGE=$IMAGE_NAME" >> $GITHUB_ENV
+
+      - name: Deploy Nginx to Cloud Run
+        run: |
+          gcloud run deploy ${{ env.NGINX_SERVICE }} \
+            --image ${{ env.NGINX_IMAGE }} \
+            --region ${{ env.REGION }} \
+            --platform managed \
+            --allow-unauthenticated \
+            --memory 512Mi \
+            --cpu 1 \
+            --max-instances 10 \
+            --min-instances 0 \
+            --port 8080 \
+            --set-env-vars "CPP_API_URL=${{ needs.deploy-cpp-api.outputs.cpp_api_url }}" \
+            --timeout 60
+
+      - name: Get Nginx URL
+        run: |
+          NGINX_URL=$(gcloud run services describe ${{ env.NGINX_SERVICE }} \
+            --region ${{ env.REGION }} \
+            --format 'value(status.url)')
+          echo "🚀 Nginx Gateway deployed at: $NGINX_URL"
+          echo "📝 API Documentation: $NGINX_URL/api-docs"
+          echo "🏥 Health Check: $NGINX_URL/health"

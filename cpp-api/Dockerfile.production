@@ -1,0 +1,62 @@
+# Multi-stage build for C++26 API production deployment
+FROM gcc:15 AS builder
+
+# Install build dependencies
+RUN apt-get update && apt-get install -y \
+    cmake \
+    ninja-build \
+    git \
+    pkg-config \
+    libnuma-dev \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set working directory
+WORKDIR /app
+
+# Copy source code
+COPY . .
+
+# Build the application
+RUN mkdir -p build && cd build && \
+    cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_STANDARD=26 -G Ninja && \
+    ninja spice_curry_api_server
+
+# Production stage
+FROM debian:bookworm-slim
+
+# Install runtime dependencies
+RUN apt-get update && apt-get install -y \
+    libstdc++6 \
+    libnuma1 \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create app user
+RUN useradd -m -u 1000 appuser
+
+WORKDIR /app
+
+# Copy binary from builder
+COPY --from=builder /app/build/spice_curry_api_server /app/
+COPY --from=builder /app/database /app/database
+
+# Set ownership
+RUN chown -R appuser:appuser /app
+
+USER appuser
+
+# Expose port
+EXPOSE 8080
+
+# Set environment variables
+ENV API_PORT=8080
+ENV LOG_LEVEL=info
+ENV ENABLE_METRICS=true
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD curl -f http://localhost:8080/health || exit 1
+
+# Run the application
+CMD ["/app/spice_curry_api_server"]
