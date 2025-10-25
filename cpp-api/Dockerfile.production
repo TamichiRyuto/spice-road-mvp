@@ -46,17 +46,16 @@ RUN chown -R appuser:appuser /app
 
 USER appuser
 
-# Expose port
+# Expose port (Cloud Run will set PORT dynamically)
 EXPOSE 8080
 
 # Set environment variables
-ENV API_PORT=8080
 ENV LOG_LEVEL=info
 ENV ENABLE_METRICS=true
 
-# Health check
+# Health check (Note: PORT may be different in Cloud Run)
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-    CMD curl -f http://localhost:8080/health || exit 1
+    CMD curl -f http://localhost:${PORT:-8080}/health || exit 1
 
 # Run the application
 CMD ["/app/spice_curry_api_server"]
