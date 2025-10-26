@@ -17,6 +17,9 @@ WORKDIR /app
 # Copy source code
 COPY . .
 
+# Initialize git submodules (for stdexec)
+RUN git submodule update --init --recursive --depth 1
+
 # Build the application
 RUN mkdir -p build && cd build && \
     cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_STANDARD=26 -G Ninja && \
