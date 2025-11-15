@@ -14,6 +14,8 @@ RUN apt-get update && apt-get install -y \
 # Set working directory
 WORKDIR /app
 
+COPY ../../database /app/database
+
 # Clone stdexec library (Cloud Run doesn't copy .git directory)
 RUN git clone --depth 1 --branch nvhpc-25.09 \
     https://github.com/NVIDIA/stdexec.git stdexec
