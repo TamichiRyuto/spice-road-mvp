@@ -38,6 +38,7 @@ services:
       - ENABLE_METRICS=true
     volumes:
       - ./cpp-api:/app
+      - ./stdexec:/app/stdexec:ro
       - ./database:/app/database:ro
     working_dir: /app
     command: >

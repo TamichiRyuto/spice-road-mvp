@@ -9,6 +9,8 @@ import {
   Stack,
   Paper,
   useTheme,
+  Tabs,
+  Tab,
 } from '@mui/material';
 import {
   LocationOn as LocationOnIcon,
@@ -16,6 +18,7 @@ import {
   PersonAdd as PersonAddIcon,
   People as PeopleIcon,
   FilterAltOff as FilterAltOffIcon,
+  BubbleChart as BubbleChartIcon,
 } from '@mui/icons-material';
 import './App.css';
 import LeafletMap from './components/LeafletMap';
@@ -25,6 +28,7 @@ import SearchBar from './components/SearchBar';
 import UserProfileCard from './components/UserProfileCard';
 import FilterBar from './components/FilterBar';
 import LocationIndicator from './components/LocationIndicator';
+import SpiceQuadrantMap from './components/SpiceQuadrantMap';
 import useGeolocation from './hooks/useGeolocation';
 import { CurryShop, UserRegistration, PublicUser, User } from './types';
 import { API_ENDPOINTS, GEOLOCATION_CONFIG, UI_CONFIG, FALLBACK_SHOPS } from './config/appConfig';
@@ -54,9 +58,16 @@ function App() {
   const [showUserRegistration, setShowUserRegistration] = useState(false);
   const [showUserProfiles, setShowUserProfiles] = useState(false);
   const [registrationLoading, setRegistrationLoading] = useState(false);
-  
+
   // Search state
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Tab state
+  const [activeTab, setActiveTab] = useState(0);
+
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
+    setActiveTab(newValue);
+  };
 
   const fetchShops = useCallback(async () => {
     try {
@@ -358,65 +369,153 @@ function App() {
         </Paper>
 
         {/* Main Content */}
-        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 3 }}>
-          {/* Map Section */}
-          <Paper elevation={1} sx={{ p: 2.5, borderRadius: 3 }}>
-            <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
-              <Stack direction="row" alignItems="center" spacing={1}>
-                <LocationOnIcon color="primary" sx={{ fontSize: '2rem' }} />
-                <Typography variant="h6" component="h2" fontWeight={700}>
-                  店舗位置マップ
-                </Typography>
-              </Stack>
-              <LocationIndicator
-                isLoading={locationLoading}
-                hasLocation={!!userLocation}
-                error={locationError}
-                accuracy={locationAccuracy}
-                lastUpdated={locationLastUpdated}
-                size="small"
-              />
-            </Stack>
-            {/* <Box className="map-container"> */}
-              <LeafletMap
-                shops={filteredShops}
-                onShopSelect={handleShopSelect}
-                selectedShop={selectedShop}
-                userLocation={userLocation}
-                onCenterOnLocation={refreshLocation}
-              />
-            {/* </Box> */}
-          </Paper>
-
-          {/* Shops List Section */}
-          <Paper elevation={1} sx={{ p: 2.5, borderRadius: 3 }}>
-            <Stack direction="row" alignItems="center" spacing={1} mb={2}>
-              <RestaurantIcon color="primary" sx={{ fontSize: '2rem' }} />
-              <Typography variant="h6" component="h2" fontWeight={700}>
-                店舗詳細情報
-              </Typography>
-            </Stack>
-            <Box
-              ref={shopListRef}
-              className="shops-list"
+        <Paper elevation={1} sx={{ p: 0, borderRadius: 3, overflow: 'hidden' }}>
+          {/* Tabs */}
+          <Box sx={{ borderBottom: 1, borderColor: 'divider', bgcolor: 'background.paper' }}>
+            <Tabs
+              value={activeTab}
+              onChange={handleTabChange}
+              aria-label="visualization tabs"
+              variant="fullWidth"
               sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 2,
+                '& .MuiTab-root': {
+                  fontWeight: 700,
+                  fontSize: '1rem',
+                  py: 2,
+                },
               }}
             >
-              {filteredShops.map(shop => (
-                <Box key={shop.id} id={`shop-${shop.id}`}>
-                  <ShopCard
-                    shop={shop}
-                    onClick={() => handleShopSelect(shop)}
-                    isSelected={selectedShop?.id === shop.id}
+              <Tab
+                icon={<LocationOnIcon />}
+                iconPosition="start"
+                label="店舗位置マップ"
+                id="tab-0"
+                aria-controls="tabpanel-0"
+              />
+              <Tab
+                icon={<BubbleChartIcon />}
+                iconPosition="start"
+                label="スパイス分析"
+                id="tab-1"
+                aria-controls="tabpanel-1"
+              />
+            </Tabs>
+          </Box>
+
+          {/* Tab Panels */}
+          <Box sx={{ p: 2.5 }}>
+            {/* Tab Panel 0: Map View */}
+            {activeTab === 0 && (
+              <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 3 }}>
+                {/* Map Section */}
+                <Paper elevation={2} sx={{ p: 2.5, borderRadius: 2 }}>
+                  <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
+                    <Stack direction="row" alignItems="center" spacing={1}>
+                      <LocationOnIcon color="primary" sx={{ fontSize: '2rem' }} />
+                      <Typography variant="h6" component="h2" fontWeight={700}>
+                        店舗位置マップ
+                      </Typography>
+                    </Stack>
+                    <LocationIndicator
+                      isLoading={locationLoading}
+                      hasLocation={!!userLocation}
+                      error={locationError}
+                      accuracy={locationAccuracy}
+                      lastUpdated={locationLastUpdated}
+                      size="small"
+                    />
+                  </Stack>
+                  <LeafletMap
+                    shops={filteredShops}
+                    onShopSelect={handleShopSelect}
+                    selectedShop={selectedShop}
+                    userLocation={userLocation}
+                    onCenterOnLocation={refreshLocation}
                   />
-                </Box>
-              ))}
-            </Box>
-          </Paper>
-        </Box>
+                </Paper>
+
+                {/* Shops List Section */}
+                <Paper elevation={2} sx={{ p: 2.5, borderRadius: 2 }}>
+                  <Stack direction="row" alignItems="center" spacing={1} mb={2}>
+                    <RestaurantIcon color="primary" sx={{ fontSize: '2rem' }} />
+                    <Typography variant="h6" component="h2" fontWeight={700}>
+                      店舗詳細情報
+                    </Typography>
+                  </Stack>
+                  <Box
+                    ref={shopListRef}
+                    className="shops-list"
+                    sx={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: 2,
+                    }}
+                  >
+                    {filteredShops.map(shop => (
+                      <Box key={shop.id} id={`shop-${shop.id}`}>
+                        <ShopCard
+                          shop={shop}
+                          onClick={() => handleShopSelect(shop)}
+                          isSelected={selectedShop?.id === shop.id}
+                        />
+                      </Box>
+                    ))}
+                  </Box>
+                </Paper>
+              </Box>
+            )}
+
+            {/* Tab Panel 1: Spice Quadrant Analysis */}
+            {activeTab === 1 && (
+              <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 3 }}>
+                {/* Quadrant Map Section */}
+                <Paper elevation={2} sx={{ p: 2.5, borderRadius: 2, height: 'fit-content', maxHeight: 650 }}>
+                  <Stack direction="row" alignItems="center" spacing={1} mb={2}>
+                    <BubbleChartIcon color="primary" sx={{ fontSize: '2rem' }} />
+                    <Typography variant="h6" component="h2" fontWeight={700}>
+                      スパイス4象限分析
+                    </Typography>
+                  </Stack>
+                  <Box sx={{ height: 500 }}>
+                    <SpiceQuadrantMap
+                      shops={filteredShops}
+                      onShopSelect={handleShopSelect}
+                      selectedShop={selectedShop}
+                    />
+                  </Box>
+                </Paper>
+
+                {/* Shops List Section */}
+                <Paper elevation={2} sx={{ p: 2.5, borderRadius: 2 }}>
+                  <Stack direction="row" alignItems="center" spacing={1} mb={2}>
+                    <RestaurantIcon color="primary" sx={{ fontSize: '2rem' }} />
+                    <Typography variant="h6" component="h2" fontWeight={700}>
+                      店舗詳細情報
+                    </Typography>
+                  </Stack>
+                  <Box
+                    className="shops-list"
+                    sx={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: 2,
+                    }}
+                  >
+                    {filteredShops.map(shop => (
+                      <Box key={shop.id} id={`shop-${shop.id}`}>
+                        <ShopCard
+                          shop={shop}
+                          onClick={() => handleShopSelect(shop)}
+                          isSelected={selectedShop?.id === shop.id}
+                        />
+                      </Box>
+                    ))}
+                  </Box>
+                </Paper>
+              </Box>
+            )}
+          </Box>
+        </Paper>
       </Container>
 
       {showUserRegistration && (
