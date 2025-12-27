@@ -8,6 +8,9 @@ RUN apt-get update && apt-get install -y \
     git \
     pkg-config \
     libnuma-dev \
+    libpq-dev \
+    libpqxx-dev \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Set working directory

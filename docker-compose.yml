@@ -15,6 +15,7 @@ services:
     depends_on:
       - cpp-api
       - frontend
+      - postgres
     restart: unless-stopped
     networks:
       - spice-network
@@ -36,6 +37,11 @@ services:
       - API_PORT=8080
       - LOG_LEVEL=info
       - ENABLE_METRICS=true
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=spice_road
+      - DB_USER=spice_user
+      - DB_PASSWORD=spice_password
     volumes:
       - ./cpp-api:/app
       - ./stdexec:/app/stdexec:ro
@@ -77,29 +83,32 @@ services:
     networks:
       - spice-network
 
-  # Static JSON Database Server
-  database:
-    image: nginx:alpine
-    container_name: spice-curry-database
+  # PostgreSQL Database
+  postgres:
+    image: postgres:17-alpine
+    container_name: spice-curry-postgres
     ports:
-      - "9000:80"
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=spice_road
+      - POSTGRES_USER=spice_user
+      - POSTGRES_PASSWORD=spice_password
+      - POSTGRES_INITDB_ARGS=--encoding=UTF-8 --locale=C
     volumes:
-      - ./database:/usr/share/nginx/html:ro
-    command: >
-      sh -c "echo '📁 Static JSON database served at http://localhost:9000/shops.json' &&
-             nginx -g 'daemon off;'"
+      - postgres-data:/var/lib/postgresql/data
+      - ./database/sql/init:/docker-entrypoint-initdb.d:ro
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/shops.json"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+      test: ["CMD-SHELL", "pg_isready -U spice_user -d spice_road"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     restart: unless-stopped
     networks:
       - spice-network
 
   # Redis for caching (optional)
   redis:
-    image: redis:7-alpine
+    image: redis:8-alpine
     container_name: spice-curry-redis
     ports:
       - "6379:6379"
@@ -116,6 +125,8 @@ services:
       - spice-network
 
 volumes:
+  postgres-data:
+    driver: local
   redis-data:
     driver: local
 

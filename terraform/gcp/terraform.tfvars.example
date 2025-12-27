@@ -1,0 +1,43 @@
+# GCP Project Configuration
+project_id = "your-gcp-project-id"  # 必須: GCPプロジェクトID
+region     = "asia-northeast1"      # オプション: デプロイ先リージョン
+environment = "prod"                # オプション: 環境名 (dev, staging, prod)
+
+# Application Configuration
+app_name = "spice-road"             # オプション: アプリケーション名
+
+# Cloud Run Configuration
+# Docker imagesのURL（最初のデプロイ時は空でOK）
+cpp_api_image  = ""  # 例: "asia-northeast1-docker.pkg.dev/PROJECT_ID/spice-road-prod/cpp-api:latest"
+frontend_image = ""  # 例: "asia-northeast1-docker.pkg.dev/PROJECT_ID/spice-road-prod/frontend:latest"
+
+# Resource Allocation
+cpp_api_memory  = "2Gi"   # C++ APIのメモリ
+cpp_api_cpu     = "2"     # C++ APIのCPU
+frontend_memory = "512Mi" # Frontendのメモリ
+frontend_cpu    = "1"     # FrontendのCPU
+
+# Access Control
+allow_unauthenticated = true  # 認証なしアクセスを許可（公開アプリの場合）
+
+# Storage Configuration
+database_bucket_name     = ""     # 空の場合は自動生成: PROJECT_ID-APP_NAME-database
+database_bucket_location = "ASIA" # バケットのロケーション
+
+# GitHub Actions Integration (オプション)
+github_repository              = ""  # 例: "your-username/spice-road-mvp"
+workload_identity_pool_id      = "github-pool"
+workload_identity_provider_id  = "github-provider"
+
+# Cloud Build Configuration (オプション)
+# enable_cloud_build = true にすると、terraform apply時にGitHubからソースをpullしてDockerイメージをビルドします
+enable_cloud_build = false  # true: GitHubから自動ビルド, false: 手動でイメージを指定
+git_ref            = "main" # ビルドするブランチ/タグ/コミットSHA
+
+# Tags and Labels
+labels = {
+  application = "spice-road"
+  managed_by  = "terraform"
+  environment = "prod"
+  team        = "platform"
+}

@@ -68,8 +68,9 @@ std::string UserService::users_to_json(const std::vector<domain::User>& users) {
 
 std::string UserService::user_to_json(const domain::User& user) {
     return std::format(
-        R"({{"id":"{}","username":"{}","email":"{}","preferred_spice_level":"{}"}})",
-        user.id, user.username, user.email, user.preferred_spice_level
+        R"({{"id":"{}","username":"{}","email":"{}","spiciness":{},"stimulation":{},"aroma":{}}})",
+        user.id, user.username, user.email,
+        user.preferences.spiciness, user.preferences.stimulation, user.preferences.aroma
     );
 }
 

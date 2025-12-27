@@ -70,21 +70,10 @@ std::expected<std::vector<domain::Shop>, std::string> JsonShopRepository::search
 }
 
 std::expected<std::vector<domain::Shop>, std::string> JsonShopRepository::find_by_spice_level(const std::string& level) {
-    auto shops_result = find_all();
-    if (!shops_result) {
-        return std::unexpected(shops_result.error());
-    }
-
-    auto& shops = shops_result.value();
-    std::vector<domain::Shop> results;
-
-    for (const auto& shop : shops) {
-        if (std::ranges::find(shop.spice_levels, level) != shop.spice_levels.end()) {
-            results.push_back(shop);
-        }
-    }
-
-    return results;
+    // 将来の実装: spice_paramsを使用してレベル判定
+    // 現在は全店舗を返す
+    (void)level; // 未使用警告を抑制
+    return find_all();
 }
 
 std::vector<domain::Shop> JsonShopRepository::parse_shops(const std::string& json) {

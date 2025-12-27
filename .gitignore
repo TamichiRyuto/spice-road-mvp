@@ -112,4 +112,8 @@ htmlcov/
 .nuxt/
 
 # Secret key
-nginx/ssl/
+*nginx/ssl/
+*.key
+*.pem
+
+terraform/gcp/docs

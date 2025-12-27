@@ -1,0 +1,14 @@
+# asdf version management
+# https://asdf-vm.com/
+
+# Terraform - Infrastructure as Code
+# Install: asdf plugin add terraform https://github.com/asdf-community/asdf-hashicorp.git
+terraform 1.14.3
+
+# Node.js - For frontend development
+# Install: asdf plugin add nodejs https://github.com/asdf-vm/asdf-nodejs.git
+nodejs 20.11.0
+
+# Python - For scripts and tools (optional)
+# Install: asdf plugin add python
+# python 3.12.1
