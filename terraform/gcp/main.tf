@@ -214,7 +214,7 @@ module "cloud_run_frontend" {
   env_vars = {
     # Frontend calls API via /api path
     REACT_APP_API_URL           = "/api"
-    REACT_APP_GOOGLE_MAPS_API_KEY = "DEMO_API_KEY"
+    REACT_APP_GOOGLE_MAPS_API_KEY = var.google_maps_api_key
   }
 
   depends_on = [

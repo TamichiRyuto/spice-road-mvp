@@ -182,6 +182,13 @@ variable "redis_auth_enabled" {
   default     = false
 }
 
+# Google Maps API Key
+variable "google_maps_api_key" {
+  description = "Google Maps JavaScript API Key for frontend"
+  type        = string
+  sensitive   = true
+}
+
 # Tags
 variable "labels" {
   description = "Labels to apply to resources"

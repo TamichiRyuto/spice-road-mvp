@@ -11,11 +11,7 @@ const STATIC_RESOURCES = [
   '/static/css/main.css',
   '/manifest.json',
   '/favicon.ico',
-  'https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700;800;900&display=swap',
-  'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.min.css',
-  'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-  'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-  'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png'
+  'https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700;800;900&display=swap'
 ];
 
 // インストール時の処理
@@ -75,9 +71,9 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // 地図タイルの処理
-  if (url.hostname.includes('tile.openstreetmap.org')) {
-    event.respondWith(handleMapTileRequest(request));
+  // Google Maps APIの処理
+  if (url.hostname.includes('maps.googleapis.com') || url.hostname.includes('maps.gstatic.com')) {
+    event.respondWith(handleMapApiRequest(request));
     return;
   }
 
@@ -130,38 +126,16 @@ async function handleApiRequest(request) {
   }
 }
 
-// 地図タイルの処理（Cache First戦略）
-async function handleMapTileRequest(request) {
-  const cache = await caches.open(RUNTIME_CACHE_NAME);
-  
-  // まずキャッシュを確認
-  let cachedResponse = await cache.match(request);
-  
-  if (cachedResponse) {
-    // キャッシュから返しつつ、バックグラウンドで更新
-    fetch(request).then(networkResponse => {
-      if (networkResponse.ok) {
-        cache.put(request, networkResponse);
-      }
-    }).catch(() => {
-      // ネットワークエラーは無視
-    });
-    
-    return cachedResponse;
-  }
-  
+// Google Maps APIの処理（Network First戦略）
+async function handleMapApiRequest(request) {
   try {
-    // キャッシュにない場合はネットワークから取得
+    // Google Maps APIは常に最新を取得（APIキーとセッション管理のため）
     const networkResponse = await fetch(request);
-    
-    if (networkResponse.ok) {
-      cache.put(request, networkResponse.clone());
-    }
-    
     return networkResponse;
   } catch (error) {
-    // 地図タイルが取得できない場合のフォールバック
-    return new Response('', { status: 404 });
+    // Google Maps APIが取得できない場合のフォールバック
+    console.error('Service Worker: Google Maps API request failed:', error);
+    return new Response('', { status: 503 });
   }
 }
 
