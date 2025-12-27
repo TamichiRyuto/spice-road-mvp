@@ -1,7 +1,7 @@
 -- Import existing shop data from shops.json
 
--- Delete sample data first
-DELETE FROM shops WHERE id IN ('shop-001', 'shop-002', 'shop-003', 'shop-004', 'shop-005');
+-- Delete all existing data first to ensure clean import
+TRUNCATE TABLE shops CASCADE;
 
 -- Insert all 50 shops from JSON
 INSERT INTO shops (id, name, address, phone, latitude, longitude, region, spiciness, stimulation, aroma, rating, description) VALUES
