@@ -32,10 +32,11 @@ RUN mkdir -p build && cd build && \
 # Production stage - use Debian bookworm base
 FROM debian:bookworm-slim
 
-# Install minimal runtime dependencies
+# Install minimal runtime dependencies including postgresql-client
 RUN apt-get update && apt-get install -y \
     ca-certificates \
     curl \
+    postgresql-client \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy all necessary libraries from builder
@@ -63,8 +64,13 @@ RUN useradd -m -u 1000 appuser
 
 WORKDIR /app
 
-# Copy binary from builder
+# Copy binary and schema files from builder
 COPY --from=builder /app/build/spice_curry_api_server /app/
+COPY schema.sql /app/
+COPY init-db.sh /app/
+
+# Make init script executable
+RUN chmod +x /app/init-db.sh
 
 # Set ownership
 RUN chown -R appuser:appuser /app
@@ -87,5 +93,5 @@ ENV ENABLE_METRICS=true
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
     CMD curl -f http://localhost:${PORT:-8080}/health || exit 1
 
-# Run the application
-CMD ["/app/spice_curry_api_server"]
+# Run the application with database initialization
+CMD ["/app/init-db.sh"]

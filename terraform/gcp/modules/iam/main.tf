@@ -10,6 +10,7 @@ resource "google_project_iam_member" "cloud_run_permissions" {
   for_each = toset([
     "roles/run.invoker",
     "roles/storage.objectViewer",
+    "roles/cloudsql.client",
   ])
 
   project = var.project_id
