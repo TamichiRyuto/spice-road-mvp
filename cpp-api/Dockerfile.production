@@ -67,6 +67,7 @@ WORKDIR /app
 # Copy binary and schema files from builder
 COPY --from=builder /app/build/spice_curry_api_server /app/
 COPY schema.sql /app/
+COPY import_shops.sql /app/
 COPY init-db.sh /app/
 
 # Make init script executable

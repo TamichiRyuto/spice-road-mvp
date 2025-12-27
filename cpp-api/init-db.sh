@@ -21,7 +21,11 @@ done
 echo "Applying database schema..."
 psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -f /app/schema.sql
 
-echo "✅ Database schema initialized successfully"
+# Import shop data
+echo "Importing shop data..."
+psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -f /app/import_shops.sql
+
+echo "✅ Database schema and data initialized successfully"
 
 # Start the application
 echo "🚀 Starting API server..."
