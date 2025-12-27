@@ -3,8 +3,6 @@
 #include <chrono>
 #include <csignal>
 #include <atomic>
-#include <fstream>
-#include <sstream>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <unistd.h>
@@ -21,60 +19,14 @@
 #include "router/router.hpp"
 #include "service/shop_service.hpp"
 #include "service/user_service.hpp"
-#include "repository/json_repository.hpp"
+#include "repository/postgres_shop_repository.hpp"
+#include "database/connection_pool.hpp"
 
 std::atomic<bool> running{true};
 
 void signal_handler(int signal) {
     std::println("🛑 Received signal {}, shutting down server gracefully...", signal);
     running = false;
-}
-
-// Async file loading using stdexec sender/receiver
-auto async_load_json_file(exec::static_thread_pool& pool, const std::string& filename) {
-    auto sched = pool.get_scheduler();
-
-    return stdexec::starts_on(sched, stdexec::just(filename))
-         | stdexec::then([](const std::string& fname) -> std::string {
-               std::string paths[] = {
-                   "/app/database/" + fname,
-                   "../database/" + fname,
-                   "database/" + fname
-               };
-
-               for (const auto& path : paths) {
-                   std::ifstream file(path);
-                   if (file.is_open()) {
-                       std::stringstream buffer;
-                       buffer << file.rdbuf();
-                       return buffer.str();
-                   }
-               }
-
-               // Fallback to empty array
-               return "[]";
-           });
-}
-
-// Pre-load data files at startup
-struct PreloadedData {
-    std::string shops_json;
-    std::string users_json;
-};
-
-PreloadedData load_all_data(exec::static_thread_pool& pool) {
-    // Load both files concurrently using when_all
-    auto work = stdexec::when_all(
-        async_load_json_file(pool, "shops.json"),
-        async_load_json_file(pool, "users.json")
-    );
-
-    auto [shops, users] = stdexec::sync_wait(std::move(work)).value();
-
-    return PreloadedData{
-        .shops_json = std::move(shops),
-        .users_json = std::move(users)
-    };
 }
 
 // Async request handling using sender/receiver pattern
@@ -109,7 +61,7 @@ auto async_handle_request(exec::static_thread_pool& pool, int client_socket,
 
 int main() {
     try {
-        std::println("🍛 Starting Spice Curry C++26 API Server with Clean Architecture");
+        std::println("🍛 Starting Spice Curry C++26 API Server with PostgreSQL");
         std::fflush(stdout);
 
         signal(SIGINT, signal_handler);
@@ -124,30 +76,46 @@ int main() {
         std::println("🔧 Thread pool initialized successfully");
         std::fflush(stdout);
 
-        // Pre-load data files concurrently at startup
-        std::println("📁 Loading data files asynchronously...");
+        // Initialize PostgreSQL connection pool
+        std::println("🗄️  Initializing PostgreSQL connection pool...");
         std::fflush(stdout);
 
-        PreloadedData data = load_all_data(pool);
+        auto db_config = database::DatabaseConfig::from_env();
+        if (!db_config.has_value()) {
+            std::println("❌ Failed to load database configuration from environment");
+            std::println("   Required environment variables:");
+            std::println("   - DB_HOST (default: localhost)");
+            std::println("   - DB_PORT (default: 5432)");
+            std::println("   - DB_NAME (default: spice_road)");
+            std::println("   - DB_USER (default: postgres)");
+            std::println("   - DB_PASSWORD (required)");
+            return 1;
+        }
 
-        std::println("✅ Data files loaded successfully");
+        auto connection_pool_result = database::ConnectionPool::create(db_config.value(), 10);
+        if (!connection_pool_result.has_value()) {
+            std::println("❌ Failed to create connection pool: {}", connection_pool_result.error());
+            return 1;
+        }
+
+        auto connection_pool = std::move(connection_pool_result.value());
+        std::println("✅ PostgreSQL connection pool initialized (size: {})", connection_pool.get_pool_size());
         std::fflush(stdout);
 
         // Initialize application layers (DI)
         std::println("🏗️  Initializing application layers...");
         std::fflush(stdout);
 
-        auto shop_repository = std::make_shared<repository::JsonShopRepository>(pool, data.shops_json);
-        auto user_repository = std::make_shared<repository::JsonUserRepository>(pool, data.users_json);
-
+        auto shop_repository = std::make_shared<repository::PostgresShopRepository>(connection_pool);
         auto shop_service = std::make_shared<service::ShopService>(shop_repository);
-        auto user_service = std::make_shared<service::UserService>(user_repository);
 
+        // Note: UserRepository is not yet implemented for PostgreSQL
+        // For now, we'll pass nullptr for user_service
         auto router = std::make_shared<router::Router>(
-            shop_service, user_service, data.shops_json, data.users_json
+            shop_service, nullptr, "", ""
         );
 
-        std::println("✅ Application layers initialized (Clean Architecture)");
+        std::println("✅ Application layers initialized (Clean Architecture + PostgreSQL)");
         std::fflush(stdout);
 
         // Socket setup
@@ -207,10 +175,10 @@ int main() {
         std::println("📊 Available endpoints:");
         std::println("  - GET /health - Health check");
         std::println("  - GET /metrics - Performance metrics");
-        std::println("  - GET /api/shops - Shop data");
-        std::println("  - GET /api/users - User profiles");
+        std::println("  - GET /api/shops - Shop data (PostgreSQL)");
         std::println("⚡ Using stdexec sender/receiver async I/O");
         std::println("🏗️  Architecture: Clean Architecture (Domain/Repository/Service/Router)");
+        std::println("🗄️  Database: PostgreSQL with connection pool");
 
         while (running) {
             sockaddr_in client_addr{};
