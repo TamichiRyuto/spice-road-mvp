@@ -21,7 +21,7 @@ import {
   BubbleChart as BubbleChartIcon,
 } from '@mui/icons-material';
 import './App.css';
-import LeafletMap from './components/LeafletMap';
+import GoogleMap from './components/GoogleMap';
 import ShopCard from './components/ShopCard';
 import UserRegistrationForm from './components/UserRegistrationForm';
 import SearchBar from './components/SearchBar';
@@ -253,7 +253,7 @@ function App() {
                     onClick={() => setShowUserRegistration(true)}
                     size="medium"
                   >
-                    ユーザー登録
+                    ユーザー
                   </Button>
                 )}
                 <Button
@@ -425,7 +425,7 @@ function App() {
                       size="small"
                     />
                   </Stack>
-                  <LeafletMap
+                  <GoogleMap
                     shops={filteredShops}
                     onShopSelect={handleShopSelect}
                     selectedShop={selectedShop}

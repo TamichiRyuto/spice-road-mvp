@@ -35,7 +35,7 @@ export default defineConfig({
         manualChunks: {
           'react-vendor': ['react', 'react-dom'],
           'mui-vendor': ['@mui/material', '@mui/icons-material'],
-          'leaflet-vendor': ['leaflet', 'react-leaflet'],
+          'maps-vendor': ['@react-google-maps/api'],
           'chart-vendor': ['chart.js', 'react-chartjs-2'],
         },
       },
@@ -48,6 +48,6 @@ export default defineConfig({
     assetsInlineLimit: 4096,
   },
   optimizeDeps: {
-    include: ['react', 'react-dom', 'leaflet', 'chart.js'],
+    include: ['react', 'react-dom', '@react-google-maps/api', 'chart.js'],
   },
 });

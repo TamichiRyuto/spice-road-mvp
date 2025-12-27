@@ -98,11 +98,11 @@ const FilterBar = ({ shops, users = [], onFilterChange, className = '', searchQu
     return filtered;
   }, [shops, searchQuery]);
 
-  // Update filtered shops when filters change
+  // Update filtered shops when filters or search query change
   useEffect(() => {
     const filteredShops = applyFilters(activeFilters);
     onFilterChange(filteredShops);
-  }, [activeFilters, applyFilters, onFilterChange]);
+  }, [activeFilters, applyFilters, onFilterChange, searchQuery]);
 
   const handleRegionToggle = (region: string) => {
     setActiveFilters(prev => ({
