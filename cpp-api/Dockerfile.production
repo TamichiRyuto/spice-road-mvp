@@ -8,18 +8,21 @@ RUN apt-get update && apt-get install -y \
     git \
     pkg-config \
     libnuma-dev \
+    libpq-dev \
+    libpqxx-dev \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
 WORKDIR /app
 
+# Copy source code first
+COPY . .
+
 # Clone stdexec library (Cloud Run doesn't copy .git directory)
+# This must be after COPY to ensure it's in the right location
 RUN git clone --depth 1 --branch nvhpc-25.09 \
     https://github.com/NVIDIA/stdexec.git stdexec
-
-# Copy source code
-COPY . .
 
 # Build the application
 RUN mkdir -p build && cd build && \
@@ -33,6 +36,8 @@ FROM debian:bookworm-slim
 RUN apt-get update && apt-get install -y \
     libstdc++6 \
     libnuma1 \
+    libpq5 \
+    libpqxx-6.4 \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
