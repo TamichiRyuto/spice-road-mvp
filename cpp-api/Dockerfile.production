@@ -29,15 +29,15 @@ RUN mkdir -p build && cd build && \
     cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_STANDARD=26 -G Ninja && \
     ninja spice_curry_api_server
 
-# Production stage
-FROM debian:bookworm-slim
+# Production stage - use gcc:15 slim for matching glibc
+FROM gcc:15
 
 # Install runtime dependencies
 RUN apt-get update && apt-get install -y \
     libstdc++6 \
     libnuma1 \
     libpq5 \
-    libpqxx-6.4 \
+    libpqxx-dev \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
@@ -48,11 +48,12 @@ WORKDIR /app
 
 # Copy binary from builder
 COPY --from=builder /app/build/spice_curry_api_server /app/
-# Note: /app/database is not copied as the app currently uses JSON repositories
-# If you need database files, add them back or switch to PostgreSQL repositories
 
 # Set ownership
 RUN chown -R appuser:appuser /app
+
+# Update library cache to ensure libpqxx is found
+RUN ldconfig
 
 USER appuser
 
@@ -62,6 +63,8 @@ EXPOSE 8080
 # Set environment variables
 ENV LOG_LEVEL=info
 ENV ENABLE_METRICS=true
+# PostgreSQL connection will be set via Cloud Run environment variables:
+# DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD
 
 # Health check (Note: PORT may be different in Cloud Run)
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
