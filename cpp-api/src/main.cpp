@@ -10,6 +10,8 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <memory>
+#include <cstdlib>
+#include <string>
 
 // stdexec headers
 #include <stdexec/execution.hpp>
@@ -165,16 +167,31 @@ int main() {
         int flags = fcntl(server_socket, F_GETFL, 0);
         fcntl(server_socket, F_SETFL, flags | O_NONBLOCK);
 
+        // Read port from environment variable (Cloud Run requirement)
+        // Priority: PORT > API_PORT > default 8080
+        int port = 8080;
+        const char* port_env = std::getenv("PORT");
+        if (!port_env) {
+            port_env = std::getenv("API_PORT");
+        }
+        if (port_env) {
+            try {
+                port = std::stoi(std::string(port_env));
+            } catch (...) {
+                std::println("⚠️  Invalid port value, using default 8080");
+            }
+        }
+
         sockaddr_in server_addr{};
         server_addr.sin_family = AF_INET;
         server_addr.sin_addr.s_addr = INADDR_ANY;
-        server_addr.sin_port = htons(8080);
+        server_addr.sin_port = htons(port);
 
-        std::println("🔌 Binding to port 8080...");
+        std::println("🔌 Binding to port {}...", port);
         std::fflush(stdout);
 
         if (bind(server_socket, (sockaddr*)&server_addr, sizeof(server_addr)) < 0) {
-            std::println("❌ Failed to bind to port 8080");
+            std::println("❌ Failed to bind to port {}", port);
             close(server_socket);
             return 1;
         }
@@ -185,7 +202,7 @@ int main() {
             return 1;
         }
 
-        std::println("🚀 C++26 API Server running on http://localhost:8080");
+        std::println("🚀 C++26 API Server running on 0.0.0.0:{}", port);
         std::fflush(stdout);
         std::println("📊 Available endpoints:");
         std::println("  - GET /health - Health check");

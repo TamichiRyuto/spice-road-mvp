@@ -78,8 +78,10 @@ std::string ShopService::shops_to_json(const std::vector<domain::Shop>& shops) {
 std::string ShopService::shop_to_json(const domain::Shop& shop) {
     return std::format(
         R"({{"id":"{}","name":"{}","address":"{}","phone":"{}","description":"{}","latitude":{},"longitude":{},"rating":{},"image_url":"{}"}})",
-        shop.id, shop.name, shop.address, shop.phone, shop.description,
-        shop.latitude, shop.longitude, shop.rating, shop.image_url
+        shop.id, shop.name, shop.address,
+        shop.phone.value_or(""), shop.description.value_or(""),
+        shop.latitude, shop.longitude, shop.rating,
+        shop.image_url.value_or("")
     );
 }
 

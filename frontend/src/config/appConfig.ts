@@ -6,8 +6,8 @@ export const API_ENDPOINTS = {
 
 export const GEOLOCATION_CONFIG = {
   enableHighAccuracy: true,
-  timeout: 10000,
-  maximumAge: 60000, // 1分間キャッシュ
+  timeout: 30000, // GPS取得に十分な時間を確保
+  maximumAge: 0, // 常に最新の位置情報を取得（キャッシュを使わない）
   watchPosition: true,
   distanceThreshold: 10, // 10m移動したら更新
   updateInterval: 60000, // 60秒間隔で最大チェック

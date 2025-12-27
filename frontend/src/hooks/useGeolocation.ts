@@ -26,9 +26,9 @@ interface GeolocationOptions {
 
 const useGeolocation = (options: GeolocationOptions = {}): GeolocationHook => {
   const {
-    enableHighAccuracy = false, // 精度より速度優先に変更
+    enableHighAccuracy = true, // GPS精度を有効化
     timeout = 30000, // タイムアウトを30秒に延長
-    maximumAge = 300000, // 5分間キャッシュに延長
+    maximumAge = 0, // キャッシュを使わず常に最新を取得
     watchPosition = true,
     distanceThreshold = 10, // 10m移動したら更新
     updateInterval = 60000, // 60秒間隔で最大チェック
@@ -66,9 +66,14 @@ const useGeolocation = (options: GeolocationOptions = {}): GeolocationHook => {
     const now = Date.now();
     const timeDiff = now - lastUpdateTimeRef.current;
 
-    // 初回は必ず受け入れる
+    // 初回の場合
     if (!lastLocationRef.current) {
-      console.log('First location, accepting regardless of accuracy');
+      // 初回でも精度が低すぎる場合は警告を出す
+      if (position.coords.accuracy > 50) {
+        console.warn('First position has low accuracy:', position.coords.accuracy, 'm. Accepting but waiting for better accuracy.');
+      } else {
+        console.log('First location with good accuracy:', position.coords.accuracy, 'm');
+      }
       return true;
     }
 
@@ -77,10 +82,17 @@ const useGeolocation = (options: GeolocationOptions = {}): GeolocationHook => {
       return false;
     }
 
-    // 精度チェック（緩和）
-    if (position.coords.accuracy > 1000) { // 1km以上の誤差は無視
+    // 精度チェック（GPS使用時は厳しめに）
+    if (position.coords.accuracy > 100) { // 100m以上の誤差は無視
       console.warn('Low accuracy position ignored:', position.coords.accuracy, 'm');
       return false;
+    }
+
+    // より精度が良い位置情報が来た場合は積極的に更新
+    const currentAccuracy = lastLocationRef.current ? accuracy : Infinity;
+    if (currentAccuracy && position.coords.accuracy < currentAccuracy * 0.8) {
+      console.log('Better accuracy found, updating:', position.coords.accuracy, 'm');
+      return true;
     }
 
     // 距離チェック
@@ -96,7 +108,7 @@ const useGeolocation = (options: GeolocationOptions = {}): GeolocationHook => {
     }
 
     return true;
-  }, [calculateDistance, distanceThreshold]);
+  }, [calculateDistance, distanceThreshold, accuracy]);
 
   // 位置情報処理
   const handleLocationUpdate = useCallback((position: GeolocationPosition) => {
@@ -188,8 +200,9 @@ const useGeolocation = (options: GeolocationOptions = {}): GeolocationHook => {
         handleLocationUpdate,
         handleLocationError,
         {
-          ...options,
-          maximumAge: 5000, // watch時は短いキャッシュ
+          enableHighAccuracy,
+          timeout,
+          maximumAge: 5000, // watch時は短いキャッシュ（より頻繁に更新）
         }
       );
     }

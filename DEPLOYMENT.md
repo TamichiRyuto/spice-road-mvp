@@ -1,234 +1,276 @@
 # GCP Cloud Run デプロイ手順
 
-このドキュメントでは、Spice Road APIをGoogle Cloud Runにデプロイする手順を説明します。
+このドキュメントでは、Spice Road MVPをTerraformを使ってGoogle Cloud Runにデプロイする手順を説明します。
+
+## 📋 概要
+
+このプロジェクトはTerraformを使用してインフラをコード化(IaC)しています。手動でのgcloudコマンド実行は不要です。
 
 ## 前提条件
 
-1. GCPプロジェクトが作成済み
-2. Google Cloud CLIがインストール済み
-3. GitHubリポジトリが作成済み
-4. 必要な権限を持つGCPサービスアカウント
+### 必須ツール
 
-## 1. GCPの初期設定
+1. **asdf** - バージョン管理ツール
+2. **Terraform** >= 1.6.6 (asdfで管理)
+3. **Google Cloud SDK (gcloud)** - GCP CLI
+4. **GCPプロジェクト** - アクティブなプロジェクトと適切な権限
 
-### Artifact Registryの作成
+### 推奨スペック
+
+- メモリ: 4GB以上
+- ディスク空き容量: 10GB以上
+- ネットワーク: インターネット接続
+
+---
+
+## 🚀 クイックスタート
+
+### 1. asdfとTerraformのセットアップ
 
 ```bash
+# asdfをインストール（未インストールの場合）
+git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.14.0
+
+# シェル設定に追加
+echo '. "$HOME/.asdf/asdf.sh"' >> ~/.bashrc  # bash の場合
+# または
+echo '. "$HOME/.asdf/asdf.sh"' >> ~/.zshrc   # zsh の場合
+
+# シェルを再起動
+source ~/.bashrc  # または source ~/.zshrc
+
+# プロジェクトルートに移動
+cd /path/to/spice-road-mvp
+
+# Terraformプラグインを追加
+asdf plugin add terraform https://github.com/asdf-community/asdf-hashicorp.git
+
+# .tool-versions に定義されたバージョンをインストール
+asdf install
+
+# 確認
+terraform version  # Terraform v1.6.6が表示されるはず
+```
+
+### 2. GCP認証設定
+
+```bash
+# gcloud認証
+gcloud auth login
+gcloud auth application-default login
+
 # プロジェクトIDを設定
-export PROJECT_ID="your-gcp-project-id"
-export REGION="asia-northeast1"
-
-# Artifact Registryリポジトリを作成
-gcloud artifacts repositories create spice-road \
-  --repository-format=docker \
-  --location=$REGION \
-  --description="Spice Road Docker images"
+gcloud config set project YOUR_PROJECT_ID
 ```
 
-### 必要なAPIの有効化
+### 3. 環境変数ファイルの作成
 
 ```bash
-gcloud services enable \
-  run.googleapis.com \
-  cloudbuild.googleapis.com \
-  artifactregistry.googleapis.com \
-  containerregistry.googleapis.com \
-  --project=$PROJECT_ID
+cd terraform/gcp
+
+# .env.example をコピー
+cp .env.example .env
+
+# エディタで編集
+nano .env
 ```
 
-### サービスアカウントの作成
+**.env の最小設定**:
 
 ```bash
-# サービスアカウントを作成
-gcloud iam service-accounts create spice-road-deployer \
-  --display-name="Spice Road Deployer" \
-  --project=$PROJECT_ID
+# GCP認証（gcloud CLI使用の場合はコメントアウト）
+# GOOGLE_APPLICATION_CREDENTIALS="/path/to/service-account-key.json"
 
-# 必要な権限を付与
-gcloud projects add-iam-policy-binding $PROJECT_ID \
-  --member="serviceAccount:spice-road-deployer@${PROJECT_ID}.iam.gserviceaccount.com" \
-  --role="roles/run.admin"
-
-gcloud projects add-iam-policy-binding $PROJECT_ID \
-  --member="serviceAccount:spice-road-deployer@${PROJECT_ID}.iam.gserviceaccount.com" \
-  --role="roles/storage.admin"
-
-gcloud projects add-iam-policy-binding $PROJECT_ID \
-  --member="serviceAccount:spice-road-deployer@${PROJECT_ID}.iam.gserviceaccount.com" \
-  --role="roles/iam.serviceAccountUser"
-
-gcloud projects add-iam-policy-binding $PROJECT_ID \
-  --member="serviceAccount:spice-road-deployer@${PROJECT_ID}.iam.gserviceaccount.com" \
-  --role="roles/artifactregistry.writer"
+# GCPプロジェクト設定（必須）
+GOOGLE_PROJECT="your-gcp-project-id"
+GOOGLE_REGION="asia-northeast1"
 ```
 
-## 2. Workload Identity Federationの設定
-
-GitHub ActionsからGCPに認証するためにWorkload Identity Federationを設定します。
+### 4. Terraform変数ファイルの作成
 
 ```bash
-# Workload Identity Poolを作成
-gcloud iam workload-identity-pools create "github-pool" \
-  --project="${PROJECT_ID}" \
-  --location="global" \
-  --display-name="GitHub Actions Pool"
+# terraform.tfvars.example をコピー
+cp terraform.tfvars.example terraform.tfvars
 
-# Workload Identity Providerを作成
-gcloud iam workload-identity-pools providers create-oidc "github-provider" \
-  --project="${PROJECT_ID}" \
-  --location="global" \
-  --workload-identity-pool="github-pool" \
-  --display-name="GitHub Provider" \
-  --attribute-mapping="google.subject=assertion.sub,attribute.actor=assertion.actor,attribute.repository=assertion.repository" \
-  --issuer-uri="https://token.actions.githubusercontent.com"
-
-# サービスアカウントにバインディングを追加
-gcloud iam service-accounts add-iam-policy-binding \
-  "spice-road-deployer@${PROJECT_ID}.iam.gserviceaccount.com" \
-  --project="${PROJECT_ID}" \
-  --role="roles/iam.workloadIdentityUser" \
-  --member="principalSet://iam.googleapis.com/projects/PROJECT_NUMBER/locations/global/workloadIdentityPools/github-pool/attribute.repository/YOUR_GITHUB_USERNAME/YOUR_REPO_NAME"
+# エディタで編集
+nano terraform.tfvars
 ```
 
-**注意**: `PROJECT_NUMBER`, `YOUR_GITHUB_USERNAME`, `YOUR_REPO_NAME`を実際の値に置き換えてください。
+**最小設定**:
 
-プロジェクト番号を取得:
-```bash
-gcloud projects describe $PROJECT_ID --format="value(projectNumber)"
+```hcl
+project_id = "your-gcp-project-id"
+region     = "asia-northeast1"
+environment = "prod"
+app_name = "spice-road"
+
+# 初回デプロイ時はイメージURLを空にしておく
+cpp_api_image  = ""
+frontend_image = ""
+
+# 認証なしアクセスを許可（公開アプリの場合）
+allow_unauthenticated = true
 ```
 
-## 3. GitHub Secretsの設定
-
-GitHubリポジトリの Settings > Secrets and variables > Actions から以下のシークレットを追加します:
-
-| Secret Name | Value | 説明 |
-|------------|-------|------|
-| `GCP_PROJECT_ID` | `your-project-id` | GCPプロジェクトID |
-| `GCP_WORKLOAD_IDENTITY_PROVIDER` | `projects/PROJECT_NUMBER/locations/global/workloadIdentityPools/github-pool/providers/github-provider` | Workload Identity Provider ID |
-| `GCP_SERVICE_ACCOUNT` | `spice-road-deployer@PROJECT_ID.iam.gserviceaccount.com` | サービスアカウントのメール |
-
-## 4. デプロイの実行
-
-### 自動デプロイ
-
-`main`ブランチにプッシュすると自動的にデプロイが実行されます:
+### 5. Terraformによるインフラ構築
 
 ```bash
-git add .
-git commit -m "Deploy to Cloud Run"
-git push origin main
+# Terraformの初期化
+./scripts/tf-init.sh
+
+# プランの確認
+./scripts/tf-plan.sh
+
+# インフラのデプロイ
+./scripts/tf-apply.sh
 ```
 
-### 手動デプロイ
-
-GitHubのActionsタブから手動でワークフローを実行できます。
-
-### ローカルから手動デプロイ
+### 6. Dockerイメージのビルドとプッシュ
 
 ```bash
-# C++ APIのビルドとデプロイ
+# Docker認証を設定
+gcloud auth configure-docker asia-northeast1-docker.pkg.dev
+
+# Artifact Registry URLを取得
+REGISTRY_URL=$(cd terraform/gcp && terraform output -raw artifact_registry_repository_url)
+
+# C++ APIイメージをビルド＆プッシュ
 cd cpp-api
-gcloud builds submit --tag $REGION-docker.pkg.dev/$PROJECT_ID/spice-road/spice-road-cpp-api -f Dockerfile.production .
+docker build -t ${REGISTRY_URL}/cpp-api:latest .
+docker push ${REGISTRY_URL}/cpp-api:latest
 
-gcloud run deploy spice-road-cpp-api \
-  --image $REGION-docker.pkg.dev/$PROJECT_ID/spice-road/spice-road-cpp-api \
-  --region $REGION \
-  --platform managed \
-  --allow-unauthenticated \
-  --memory 2Gi \
-  --cpu 2 \
-  --port 8080
-
-# C++ APIのURLを取得
-CPP_API_URL=$(gcloud run services describe spice-road-cpp-api \
-  --region $REGION \
-  --format 'value(status.url)')
-
-# Nginxのビルドとデプロイ
-cd ../nginx
-gcloud builds submit --tag $REGION-docker.pkg.dev/$PROJECT_ID/spice-road/spice-road-nginx .
-
-gcloud run deploy spice-road-nginx \
-  --image $REGION-docker.pkg.dev/$PROJECT_ID/spice-road/spice-road-nginx \
-  --region $REGION \
-  --platform managed \
-  --allow-unauthenticated \
-  --memory 512Mi \
-  --cpu 1 \
-  --port 8080 \
-  --set-env-vars "CPP_API_URL=$CPP_API_URL"
+# Frontendイメージをビルド＆プッシュ
+cd ../frontend
+docker build -t ${REGISTRY_URL}/frontend:latest .
+docker push ${REGISTRY_URL}/frontend:latest
 ```
 
-## 5. デプロイの確認
+### 7. Cloud Runサービスの更新
 
-デプロイが完了したら、以下のコマンドでURLを確認します:
+イメージをプッシュしたら、`terraform/gcp/terraform.tfvars`を更新：
+
+```hcl
+cpp_api_image  = "asia-northeast1-docker.pkg.dev/PROJECT_ID/spice-road-prod/cpp-api:latest"
+frontend_image = "asia-northeast1-docker.pkg.dev/PROJECT_ID/spice-road-prod/frontend:latest"
+```
+
+再度Terraformを実行：
 
 ```bash
-# Nginx GatewayのURL
-gcloud run services describe spice-road-nginx \
-  --region $REGION \
-  --format 'value(status.url)'
+cd terraform/gcp
+./scripts/tf-apply.sh
 ```
 
-### エンドポイントのテスト
+### 8. デプロイの確認
 
 ```bash
-# NginxのURL
-NGINX_URL=$(gcloud run services describe spice-road-nginx --region $REGION --format 'value(status.url)')
+# FrontendのURLを取得
+terraform output frontend_service_url
 
-# ヘルスチェック
-curl $NGINX_URL/health
+# APIへアクセス（ヘルスチェック）
+API_URL=$(terraform output -raw cpp_api_service_url)
+curl $API_URL/health
 
-# API ドキュメント
-curl $NGINX_URL/api-docs
-
-# APIエンドポイントのテスト
-curl $NGINX_URL/api/shops
+# ブラウザでアクセス
+open $(terraform output -raw frontend_service_url)
 ```
 
-## アーキテクチャ
+---
+
+## 📚 詳細ドキュメント
+
+より詳しい手順や設定については、以下のドキュメントを参照してください：
+
+- **[terraform/gcp/DEPLOYMENT.md](terraform/gcp/DEPLOYMENT.md)** - 詳細なデプロイ手順
+- **[terraform/gcp/README.md](terraform/gcp/README.md)** - Terraform設定の説明
+- **[terraform/gcp/ARCHITECTURE.md](terraform/gcp/ARCHITECTURE.md)** - アーキテクチャの詳細
+
+---
+
+## 🏗️ アーキテクチャ
 
 ```
 Internet
     ↓
-[Cloud Run: Nginx Gateway]
-    ↓ (内部通信)
+[Cloud Run: Frontend]
+    ↓
 [Cloud Run: C++ API]
+    ↓
+[Cloud SQL: PostgreSQL]
+    ↓
+[Redis: Memorystore]
 ```
 
-- **Nginx**: リバースプロキシ、キャッシング、CORS処理
-- **C++ API**: C++26で実装されたバックエンドAPI
+**デプロイされるリソース:**
+- Artifact Registry (Dockerイメージ保存)
+- Cloud Run Services (Frontend, C++ API)
+- Cloud SQL (PostgreSQL 16 データベース)
+- Memorystore (Redis キャッシュ)
+- IAM (サービスアカウント、Workload Identity Federation)
 
-## 料金について
+---
+
+## 💰 料金について
 
 Cloud Runは使用量ベースの課金です:
 - 0リクエスト時: ほぼ無料（最小インスタンス0）
 - リクエスト数に応じて自動スケール
 - 使用したリソース分のみ課金
 
-## トラブルシューティング
+詳細: https://cloud.google.com/run/pricing
+
+---
+
+## 🔧 トラブルシューティング
+
+### エラー: "terraform: command not found"
+
+```bash
+# asdfでTerraformがインストールされているか確認
+asdf list terraform
+
+# インストールされていない場合
+asdf install terraform 1.6.6
+```
+
+### エラー: "Error: google: could not find default credentials"
+
+```bash
+# gcloud認証を実行
+gcloud auth application-default login
+
+# または .env ファイルを確認
+cat terraform/gcp/.env
+```
 
 ### ログの確認
 
 ```bash
 # C++ APIのログ
-gcloud run logs read spice-road-cpp-api --region $REGION --limit 50
+gcloud run logs read spice-road-cpp-api --region asia-northeast1 --limit 50
 
-# Nginxのログ
-gcloud run logs read spice-road-nginx --region $REGION --limit 50
+# Frontendのログ
+gcloud run logs read spice-road-frontend --region asia-northeast1 --limit 50
 ```
 
-### サービスの削除
+---
+
+## 🧹 インフラの削除
+
+すべてのリソースを削除する場合：
 
 ```bash
-gcloud run services delete spice-road-nginx --region $REGION
-gcloud run services delete spice-road-cpp-api --region $REGION
+cd terraform/gcp
+./scripts/tf-destroy.sh
 ```
 
-## 次のステップ
+**⚠️ 警告**: この操作は元に戻せません。すべてのCloud Runサービス、Cloud SQL、Redis、IAMリソースが削除されます。
 
-- [ ] カスタムドメインの設定
-- [ ] Cloud CDNの有効化
-- [ ] Cloud Armorでセキュリティ強化
-- [ ] Cloud Loggingでモニタリング設定
-- [ ] Cloud Schedulerで定期的なヘルスチェック
+---
+
+## 📖 参考資料
+
+- [Terraform公式ドキュメント](https://www.terraform.io/docs)
+- [Google Cloud Run Documentation](https://cloud.google.com/run/docs)
+- [Authentication for Terraform | Google Cloud](https://cloud.google.com/docs/terraform/authentication)
+- [asdf公式サイト](https://asdf-vm.com/)

@@ -30,7 +30,10 @@
     "start": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:run": "vitest run"
   },
   "overrides": {
     "svgo": "^3.3.2",
@@ -40,8 +43,11 @@
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^5.0.4",
+    "@vitest/ui": "^4.0.16",
+    "jsdom": "^27.3.0",
     "vite": "^7.1.9",
     "vite-plugin-svgr": "^4.5.0",
-    "vite-tsconfig-paths": "^5.1.4"
+    "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "^4.0.16"
   }
 }
