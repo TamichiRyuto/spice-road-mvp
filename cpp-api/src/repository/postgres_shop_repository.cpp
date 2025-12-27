@@ -10,7 +10,7 @@ PostgresShopRepository::PostgresShopRepository(database::ConnectionPool& pool)
 domain::Shop PostgresShopRepository::row_to_shop(const pqxx::row& row) {
     domain::Shop shop;
 
-    shop.id = std::to_string(row["id"].as<int>());
+    shop.id = row["id"].as<std::string>();
     shop.name = row["name"].as<std::string>();
     shop.address = row["address"].as<std::string>();
     shop.latitude = row["latitude"].as<double>();
@@ -74,8 +74,6 @@ PostgresShopRepository::find_by_id(const std::string& id) {
     auto& conn = conn_result.value();
 
     try {
-        int shop_id = std::stoi(id);
-
         pqxx::work txn(conn.raw_connection());
 
         const std::string query = R"(
@@ -86,7 +84,7 @@ PostgresShopRepository::find_by_id(const std::string& id) {
             WHERE id = $1
         )";
 
-        auto result = txn.exec_params(query, shop_id);
+        auto result = txn.exec_params(query, id);
 
         if (result.empty()) {
             return std::optional<domain::Shop>{};
@@ -182,11 +180,9 @@ PostgresShopRepository::update(const domain::Shop& entity) {
                      created_at, updated_at
         )";
 
-        int shop_id = std::stoi(entity.id);
-
         auto result = txn.exec_params(
             query,
-            shop_id,
+            entity.id,
             entity.name,
             entity.address,
             entity.latitude,
@@ -226,13 +222,11 @@ PostgresShopRepository::remove(const std::string& id) {
     auto& conn = conn_result.value();
 
     try {
-        int shop_id = std::stoi(id);
-
         pqxx::work txn(conn.raw_connection());
 
         const std::string query = "DELETE FROM shops WHERE id = $1";
 
-        auto result = txn.exec_params(query, shop_id);
+        auto result = txn.exec_params(query, id);
 
         txn.commit();
 

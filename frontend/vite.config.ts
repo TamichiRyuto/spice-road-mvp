@@ -19,6 +19,11 @@ export default defineConfig({
   preview: {
     port: 3000,
     host: true,
+    allowedHosts: [
+      'spice-road-mvp-frontend-dev-gpxy5envpq-dt.a.run.app',
+      'spice-road-mvp-frontend-dev-229280098957.asia-northeast2.run.app',
+      '.run.app',
+    ],
   },
   build: {
     outDir: 'build',
