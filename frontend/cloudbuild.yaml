@@ -1,0 +1,33 @@
+# Cloud Build configuration for Frontend
+# This file is used by Terraform's Cloud Build module to build and push Docker images
+
+steps:
+  # Build the Docker image
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - '${_IMAGE_NAME}'
+      - '-f'
+      - 'Dockerfile'
+      - '.'
+    timeout: '1200s'  # 20 minutes
+
+  # Push the Docker image to Artifact Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - '${_IMAGE_NAME}'
+
+# Images to be pushed to Artifact Registry
+images:
+  - '${_IMAGE_NAME}'
+
+# Build options
+options:
+  machineType: 'E2_HIGHCPU_8'  # Use high-CPU machine for faster npm builds
+  diskSizeGb: 50
+  logging: CLOUD_LOGGING_ONLY
+
+# Timeout for the entire build
+timeout: '1200s'  # 20 minutes

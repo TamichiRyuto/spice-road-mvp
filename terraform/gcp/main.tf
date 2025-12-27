@@ -131,7 +131,7 @@ module "cloud_build" {
   region                      = var.region
   app_name                    = var.app_name
   artifact_registry_location  = var.artifact_registry_location
-  repository_id               = module.artifact_registry.repository_id
+  repository_id               = module.artifact_registry.repository_name
   github_repository           = var.github_repository
   git_ref                     = var.git_ref
 
