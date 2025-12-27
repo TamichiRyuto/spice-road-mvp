@@ -3,6 +3,9 @@ set -e
 
 echo "🗄️  Initializing database schema..."
 
+# Set PGPASSWORD environment variable for psql
+export PGPASSWORD="$DB_PASSWORD"
+
 # Wait for database to be ready
 echo "Waiting for database connection..."
 for i in {1..30}; do
