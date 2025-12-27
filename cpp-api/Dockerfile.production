@@ -29,17 +29,34 @@ RUN mkdir -p build && cd build && \
     cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_STANDARD=26 -G Ninja && \
     ninja spice_curry_api_server
 
-# Production stage - use gcc:15 slim for matching glibc
-FROM gcc:15
+# Production stage - use Debian bookworm base
+FROM debian:bookworm-slim
 
-# Install runtime dependencies
+# Install minimal runtime dependencies
 RUN apt-get update && apt-get install -y \
-    libstdc++6 \
-    libnuma1 \
-    libpq5 \
-    libpqxx-dev \
+    ca-certificates \
     curl \
     && rm -rf /var/lib/apt/lists/*
+
+# Copy all necessary libraries from builder
+COPY --from=builder /usr/lib/gcc/x86_64-linux-gnu/14 /usr/lib/gcc/x86_64-linux-gnu/14
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libstdc++.so.6 /usr/lib/x86_64-linux-gnu/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libgcc_s.so.1 /usr/lib/x86_64-linux-gnu/
+COPY --from=builder /lib/x86_64-linux-gnu/libm.so.6 /lib/x86_64-linux-gnu/
+COPY --from=builder /lib/x86_64-linux-gnu/libc.so.6 /lib/x86_64-linux-gnu/
+COPY --from=builder /lib64/ld-linux-x86-64.so.2 /lib64/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libnuma* /usr/lib/x86_64-linux-gnu/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libpq* /usr/lib/x86_64-linux-gnu/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libssl* /usr/lib/x86_64-linux-gnu/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libcrypto* /usr/lib/x86_64-linux-gnu/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libgssapi* /usr/lib/x86_64-linux-gnu/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libldap* /usr/lib/x86_64-linux-gnu/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/liblber* /usr/lib/x86_64-linux-gnu/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libsasl2* /usr/lib/x86_64-linux-gnu/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libkrb5* /usr/lib/x86_64-linux-gnu/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libk5crypto* /usr/lib/x86_64-linux-gnu/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libcom_err* /usr/lib/x86_64-linux-gnu/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libkeyutils* /usr/lib/x86_64-linux-gnu/
 
 # Create app user
 RUN useradd -m -u 1000 appuser
@@ -52,7 +69,7 @@ COPY --from=builder /app/build/spice_curry_api_server /app/
 # Set ownership
 RUN chown -R appuser:appuser /app
 
-# Update library cache to ensure libpqxx is found
+# Update library cache
 RUN ldconfig
 
 USER appuser
