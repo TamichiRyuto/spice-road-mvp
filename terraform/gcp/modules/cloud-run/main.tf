@@ -7,6 +7,7 @@ resource "google_cloud_run_v2_service" "main" {
 
   template {
     service_account = var.service_account_email
+    timeout         = "300s"  # 5 minutes timeout for container startup
 
     containers {
       image = var.image
@@ -27,6 +28,32 @@ resource "google_cloud_run_v2_service" "main" {
         content {
           name  = env.key
           value = env.value
+        }
+      }
+
+      # Startup probe - give more time for C++ applications
+      startup_probe {
+        initial_delay_seconds = 0
+        timeout_seconds       = 10
+        period_seconds        = 10
+        failure_threshold     = 30  # 30 * 10s = 5 minutes max startup time
+
+        http_get {
+          path = "/health"
+          port = var.port
+        }
+      }
+
+      # Liveness probe
+      liveness_probe {
+        initial_delay_seconds = 0
+        timeout_seconds       = 5
+        period_seconds        = 30
+        failure_threshold     = 3
+
+        http_get {
+          path = "/health"
+          port = var.port
         }
       }
 

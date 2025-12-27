@@ -2,14 +2,14 @@
 # This file is used by Terraform's Cloud Build module to build and push Docker images
 
 steps:
-  # Build the Docker image
+  # Build the Docker image using production Dockerfile
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'build'
       - '-t'
       - '${_IMAGE_NAME}'
       - '-f'
-      - 'Dockerfile'
+      - 'Dockerfile.production'
       - '.'
     timeout: '1800s'  # 30 minutes
 
