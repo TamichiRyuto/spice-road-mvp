@@ -46,9 +46,10 @@ protected:
 
     Shop create_test_shop(const std::string& name_suffix = "") {
         return Shop(
-            0,  // IDは自動採番
+            "",  // IDは自動採番
             "Test Shop" + name_suffix,
             "奈良県奈良市テスト町1-1",
+            std::nullopt,  // phone
             34.6851,
             135.805,
             "奈良市",
@@ -76,7 +77,7 @@ TEST_F(ShopRepositoryTest, AddShop) {
     EXPECT_TRUE(result.has_value());
 
     auto added_shop = result.value();
-    EXPECT_GT(added_shop.id, 0);
+    EXPECT_FALSE(added_shop.id.empty());
     EXPECT_EQ(added_shop.name, "Test Shop");
     EXPECT_EQ(added_shop.region, "奈良市");
     EXPECT_EQ(added_shop.spice_params.spiciness, 60);
@@ -92,10 +93,10 @@ TEST_F(ShopRepositoryTest, FindById) {
     auto add_result = repository->add(shop);
     ASSERT_TRUE(add_result.has_value());
 
-    int shop_id = add_result.value().id;
+    std::string shop_id = add_result.value().id;
 
     // IDで検索
-    auto find_result = repository->find_by_id(std::to_string(shop_id));
+    auto find_result = repository->find_by_id(shop_id);
     EXPECT_TRUE(find_result.has_value());
 
     auto found_shop_opt = find_result.value();
@@ -138,7 +139,7 @@ TEST_F(ShopRepositoryTest, UpdateShop) {
     EXPECT_EQ(updated_shop.spice_params.spiciness, 90);
 
     // DBから再取得して確認
-    auto find_result = repository->find_by_id(std::to_string(updated_shop.id));
+    auto find_result = repository->find_by_id(updated_shop.id);
     ASSERT_TRUE(find_result.has_value());
     auto found_shop = find_result.value().value();
 
@@ -153,15 +154,15 @@ TEST_F(ShopRepositoryTest, RemoveShop) {
     auto add_result = repository->add(shop);
     ASSERT_TRUE(add_result.has_value());
 
-    int shop_id = add_result.value().id;
+    std::string shop_id = add_result.value().id;
 
     // 削除
-    auto remove_result = repository->remove(std::to_string(shop_id));
+    auto remove_result = repository->remove(shop_id);
     EXPECT_TRUE(remove_result.has_value());
     EXPECT_TRUE(remove_result.value());
 
     // 削除されたことを確認
-    auto find_result = repository->find_by_id(std::to_string(shop_id));
+    auto find_result = repository->find_by_id(shop_id);
     ASSERT_TRUE(find_result.has_value());
     EXPECT_FALSE(find_result.value().has_value());
 }

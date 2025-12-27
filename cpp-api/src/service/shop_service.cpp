@@ -5,14 +5,15 @@
 
 namespace service {
 
-ShopService::ShopService(std::shared_ptr<repository::JsonShopRepository> repository)
+ShopService::ShopService(std::shared_ptr<repository::IRepository<domain::Shop>> repository)
     : repository_(std::move(repository)) {}
 
 std::expected<std::string, std::string> ShopService::get_all_shops_json() {
-    // リポジトリから全データ取得は現在のJSONベースでは不要なので
-    // 直接JSON文字列を返す実装に変更する必要があるが、
-    // 今回は単純にリポジトリのJSON文字列を返す
-    return std::unexpected("Not implemented yet");
+    auto result = repository_->find_all();
+    if (!result) {
+        return std::unexpected(result.error());
+    }
+    return shops_to_json(result.value());
 }
 
 std::expected<std::string, std::string> ShopService::get_shop_by_id_json(const std::string& id) {
@@ -29,21 +30,44 @@ std::expected<std::string, std::string> ShopService::get_shop_by_id_json(const s
 }
 
 std::expected<std::string, std::string> ShopService::search_shops_by_name_json(const std::string& name) {
-    auto result = repository_->search_by_name(name);
-    if (!result) {
-        return std::unexpected(result.error());
+    // Get all shops and filter by name
+    auto all_shops_result = repository_->find_all();
+    if (!all_shops_result) {
+        return std::unexpected(all_shops_result.error());
     }
 
-    return shops_to_json(result.value());
+    std::vector<domain::Shop> filtered_shops;
+    for (const auto& shop : all_shops_result.value()) {
+        if (shop.name.find(name) != std::string::npos) {
+            filtered_shops.push_back(shop);
+        }
+    }
+
+    return shops_to_json(filtered_shops);
 }
 
 std::expected<std::string, std::string> ShopService::search_shops_by_spice_level_json(const std::string& level) {
-    auto result = repository_->find_by_spice_level(level);
-    if (!result) {
-        return std::unexpected(result.error());
+    // Parse level and filter shops by spiciness
+    int spice_level = 0;
+    try {
+        spice_level = std::stoi(level);
+    } catch (...) {
+        return std::unexpected("Invalid spice level");
     }
 
-    return shops_to_json(result.value());
+    auto all_shops_result = repository_->find_all();
+    if (!all_shops_result) {
+        return std::unexpected(all_shops_result.error());
+    }
+
+    std::vector<domain::Shop> filtered_shops;
+    for (const auto& shop : all_shops_result.value()) {
+        if (shop.spice_params.spiciness >= spice_level) {
+            filtered_shops.push_back(shop);
+        }
+    }
+
+    return shops_to_json(filtered_shops);
 }
 
 std::expected<std::string, std::string> ShopService::find_nearby_shops_json(
@@ -77,10 +101,13 @@ std::string ShopService::shops_to_json(const std::vector<domain::Shop>& shops) {
 
 std::string ShopService::shop_to_json(const domain::Shop& shop) {
     return std::format(
-        R"({{"id":"{}","name":"{}","address":"{}","phone":"{}","description":"{}","latitude":{},"longitude":{},"rating":{},"image_url":"{}"}})",
+        R"({{"id":"{}","name":"{}","address":"{}","phone":"{}","latitude":{},"longitude":{},"region":"{}","spiciness":{},"stimulation":{},"aroma":{},"rating":{},"description":"{}","image_url":"{}"}})",
         shop.id, shop.name, shop.address,
-        shop.phone.value_or(""), shop.description.value_or(""),
-        shop.latitude, shop.longitude, shop.rating,
+        shop.phone.value_or(""),
+        shop.latitude, shop.longitude, shop.region,
+        shop.spice_params.spiciness, shop.spice_params.stimulation, shop.spice_params.aroma,
+        shop.rating,
+        shop.description.value_or(""),
         shop.image_url.value_or("")
     );
 }

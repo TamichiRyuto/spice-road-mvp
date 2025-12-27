@@ -1,5 +1,5 @@
 #pragma once
-#include "../repository/json_repository.hpp"
+#include "../repository/i_repository.hpp"
 #include "../domain/shop.hpp"
 #include <memory>
 #include <string>
@@ -10,7 +10,7 @@ namespace service {
 // Shop関連のビジネスロジックを担当
 class ShopService {
 public:
-    explicit ShopService(std::shared_ptr<repository::JsonShopRepository> repository);
+    explicit ShopService(std::shared_ptr<repository::IRepository<domain::Shop>> repository);
 
     // 全店舗取得
     std::expected<std::string, std::string> get_all_shops_json();
@@ -28,7 +28,7 @@ public:
     std::expected<std::string, std::string> find_nearby_shops_json(double latitude, double longitude, double radius_km);
 
 private:
-    std::shared_ptr<repository::JsonShopRepository> repository_;
+    std::shared_ptr<repository::IRepository<domain::Shop>> repository_;
 
     // ドメインオブジェクトからJSON文字列への変換
     std::string shops_to_json(const std::vector<domain::Shop>& shops);

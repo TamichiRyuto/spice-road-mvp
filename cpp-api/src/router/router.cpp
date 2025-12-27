@@ -77,19 +77,29 @@ std::string Router::handle_metrics() {
 }
 
 std::string Router::handle_get_shops(const std::unordered_map<std::string, std::string>& query_params) {
-    // TODO: クエリパラメータでフィルタリング (region, minRating)
-    // 現在は全件返却
-    return create_json_response(shops_json_);
+    if (!shop_service_) {
+        return create_error_response("Shop service not available", 503, "SERVICE_UNAVAILABLE");
+    }
+
+    auto result = shop_service_->get_all_shops_json();
+    if (!result) {
+        return create_error_response(result.error(), 500, "INTERNAL_ERROR");
+    }
+
+    return create_json_response(result.value());
 }
 
 std::string Router::handle_get_shop_by_id(const std::string& shop_id) {
-    // TODO: JSONから特定のshopを検索
-    // 現在は簡易実装
-    if (shops_json_.find("\"id\":\"" + shop_id + "\"") != std::string::npos) {
-        // 本来はJSONパースして該当shopのみ返すべき
-        return create_json_response(shops_json_);
+    if (!shop_service_) {
+        return create_error_response("Shop service not available", 503, "SERVICE_UNAVAILABLE");
     }
-    return create_error_response("Shop not found", 404, "NOT_FOUND");
+
+    auto result = shop_service_->get_shop_by_id_json(shop_id);
+    if (!result) {
+        return create_error_response(result.error(), 404, "NOT_FOUND");
+    }
+
+    return create_json_response(result.value());
 }
 
 std::string Router::handle_get_users() {

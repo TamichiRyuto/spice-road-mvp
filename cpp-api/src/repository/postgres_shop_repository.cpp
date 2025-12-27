@@ -10,7 +10,7 @@ PostgresShopRepository::PostgresShopRepository(database::ConnectionPool& pool)
 domain::Shop PostgresShopRepository::row_to_shop(const pqxx::row& row) {
     domain::Shop shop;
 
-    shop.id = row["id"].as<int>();
+    shop.id = std::to_string(row["id"].as<int>());
     shop.name = row["name"].as<std::string>();
     shop.address = row["address"].as<std::string>();
     shop.latitude = row["latitude"].as<double>();
@@ -182,9 +182,11 @@ PostgresShopRepository::update(const domain::Shop& entity) {
                      created_at, updated_at
         )";
 
+        int shop_id = std::stoi(entity.id);
+
         auto result = txn.exec_params(
             query,
-            entity.id,
+            shop_id,
             entity.name,
             entity.address,
             entity.latitude,
