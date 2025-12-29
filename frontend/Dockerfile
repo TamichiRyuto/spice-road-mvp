@@ -10,10 +10,11 @@ COPY . .
 # Build argument for Google Maps API Key
 ARG VITE_GOOGLE_MAPS_API_KEY
 
-# Create .env file for Vite build
-RUN echo "VITE_GOOGLE_MAPS_API_KEY=$VITE_GOOGLE_MAPS_API_KEY" > .env && \
-    echo "DEBUG: .env file contents:" && cat .env && \
-    echo "DEBUG: ARG value: $VITE_GOOGLE_MAPS_API_KEY"
+# Create .env file for Vite build and verify
+RUN printf "VITE_GOOGLE_MAPS_API_KEY=%s\n" "$VITE_GOOGLE_MAPS_API_KEY" > .env && \
+    echo "DEBUG: .env file created" && \
+    cat .env && \
+    echo "DEBUG: End of .env file"
 
 # Build the app
 RUN npm run build
