@@ -139,6 +139,7 @@ module "cloud_build" {
   enable_frontend_build       = var.enable_cloud_build
   cpp_api_subdirectory        = "cpp-api"
   frontend_subdirectory       = "frontend"
+  google_maps_api_key         = var.google_maps_api_key
 
   labels = var.labels
 

@@ -69,3 +69,10 @@ variable "depends_on_resources" {
   type        = list(any)
   default     = []
 }
+
+variable "google_maps_api_key" {
+  description = "Google Maps API Key for frontend build"
+  type        = string
+  sensitive   = true
+  default     = ""
+}

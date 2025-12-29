@@ -51,7 +51,7 @@ resource "null_resource" "build_frontend" {
       gcloud builds submit \
         --project=${var.project_id} \
         --config=cloudbuild.yaml \
-        --substitutions=_IMAGE_NAME=${var.artifact_registry_location}-docker.pkg.dev/${var.project_id}/${var.repository_id}/frontend:latest \
+        --substitutions=_IMAGE_NAME=${var.artifact_registry_location}-docker.pkg.dev/${var.project_id}/${var.repository_id}/frontend:latest,_VITE_GOOGLE_MAPS_API_KEY=${var.google_maps_api_key} \
         .
       rm -rf $TEMP_DIR
     EOT

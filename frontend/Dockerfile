@@ -7,6 +7,10 @@ RUN npm ci
 
 COPY . .
 
+# Build argument for Google Maps API Key
+ARG VITE_GOOGLE_MAPS_API_KEY
+ENV VITE_GOOGLE_MAPS_API_KEY=$VITE_GOOGLE_MAPS_API_KEY
+
 # Build the app
 RUN npm run build
 

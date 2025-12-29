@@ -80,7 +80,7 @@ const GoogleMap = ({ shops, onShopSelect, selectedShop, userLocation, onCenterOn
     onShopSelect(shop);
   };
 
-  const apiKey = process.env.REACT_APP_GOOGLE_MAPS_API_KEY || '';
+  const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
 
   if (!apiKey) {
     return (
