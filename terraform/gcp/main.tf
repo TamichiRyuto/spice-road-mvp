@@ -140,6 +140,7 @@ module "cloud_build" {
   cpp_api_subdirectory        = "cpp-api"
   frontend_subdirectory       = "frontend"
   google_maps_api_key         = var.google_maps_api_key
+  cpp_api_url                 = "https://${var.app_name}-cpp-api-${var.environment}-gpxy5envpq-dt.a.run.app"
 
   labels = var.labels
 

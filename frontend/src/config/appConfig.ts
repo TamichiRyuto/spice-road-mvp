@@ -1,7 +1,10 @@
+// Get API base URL from environment variable or use default
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://spice-road-mvp-cpp-api-dev-gpxy5envpq-dt.a.run.app';
+
 export const API_ENDPOINTS = {
-  SHOPS: '/api/shops',
-  USERS: '/api/users',
-  USER_REGISTER: '/api/users/register',
+  SHOPS: `${API_BASE_URL}/api/shops`,
+  USERS: `${API_BASE_URL}/api/users`,
+  USER_REGISTER: `${API_BASE_URL}/api/users/register`,
 } as const;
 
 export const GEOLOCATION_CONFIG = {

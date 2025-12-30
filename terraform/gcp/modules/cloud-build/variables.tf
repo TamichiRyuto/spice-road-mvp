@@ -76,3 +76,9 @@ variable "google_maps_api_key" {
   sensitive   = true
   default     = ""
 }
+
+variable "cpp_api_url" {
+  description = "C++ API URL for frontend to connect to"
+  type        = string
+  default     = ""
+}
