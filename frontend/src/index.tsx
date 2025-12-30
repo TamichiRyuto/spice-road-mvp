@@ -18,42 +18,43 @@ root.render(
   </React.StrictMode>
 );
 
-// Service Worker registration for performance optimization
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', async () => {
-    try {
-      const registration = await navigator.serviceWorker.register('/sw.js', {
-        scope: '/'
-      });
-      
-      console.log('Service Worker registered successfully:', registration.scope);
-      
-      // Handle updates
-      registration.addEventListener('updatefound', () => {
-        const newWorker = registration.installing;
-        if (newWorker) {
-          newWorker.addEventListener('statechange', () => {
-            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-              console.log('New Service Worker available');
-              // Optionally notify user about update
-            }
-          });
-        }
-      });
-      
-    } catch (error) {
-      console.log('Service Worker registration failed:', error);
-    }
-  });
+// Service Worker registration temporarily disabled
+// TODO: Fix Service Worker static resource paths for Vite build
+// if ('serviceWorker' in navigator) {
+//   window.addEventListener('load', async () => {
+//     try {
+//       const registration = await navigator.serviceWorker.register('/sw.js', {
+//         scope: '/'
+//       });
+//
+//       console.log('Service Worker registered successfully:', registration.scope);
+//
+//       // Handle updates
+//       registration.addEventListener('updatefound', () => {
+//         const newWorker = registration.installing;
+//         if (newWorker) {
+//           newWorker.addEventListener('statechange', () => {
+//             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+//               console.log('New Service Worker available');
+//               // Optionally notify user about update
+//             }
+//           });
+//         }
+//       });
+//
+//     } catch (error) {
+//       console.log('Service Worker registration failed:', error);
+//     }
+//   });
 
-  // Listen for messages from Service Worker
-  navigator.serviceWorker.addEventListener('message', event => {
-    if (event.data.type === 'BACKGROUND_LOCATION_UPDATE') {
-      console.log('Background location update received');
-      // Handle background location updates if needed
-    }
-  });
-}
+//   // Listen for messages from Service Worker
+//   navigator.serviceWorker.addEventListener('message', event => {
+//     if (event.data.type === 'BACKGROUND_LOCATION_UPDATE') {
+//       console.log('Background location update received');
+//       // Handle background location updates if needed
+//     }
+//   });
+// }
 
 // Performance monitoring
 reportWebVitals((metric) => {
