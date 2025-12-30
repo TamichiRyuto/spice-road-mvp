@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { GoogleMap as GoogleMapReact, LoadScript, Marker, InfoWindow } from '@react-google-maps/api';
+import { GoogleMap as GoogleMapReact, Marker, InfoWindow } from '@react-google-maps/api';
 import './css/GoogleMap.css';
 import { CurryShop } from '../types';
 
@@ -80,75 +80,62 @@ const GoogleMap = ({ shops, onShopSelect, selectedShop, userLocation, onCenterOn
     onShopSelect(shop);
   };
 
-  const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
-
-  if (!apiKey) {
-    return (
-      <div className="map-error">
-        <p>Google Maps API key is not configured.</p>
-        <p>Please set REACT_APP_GOOGLE_MAPS_API_KEY in your environment variables.</p>
-      </div>
-    );
-  }
-
   return (
     <div className="map-wrapper">
-      <LoadScript googleMapsApiKey={apiKey}>
-        <GoogleMapReact
-          mapContainerStyle={mapContainerStyle}
-          center={center}
-          zoom={DEFAULT_ZOOM}
-          onLoad={onLoad}
-          onUnmount={onUnmount}
-          options={mapOptions}
-        >
-          {/* Shop Markers */}
-          {shops.map(shop => (
-            <Marker
-              key={shop.id}
-              position={{ lat: shop.latitude, lng: shop.longitude }}
-              onClick={() => handleMarkerClick(shop)}
-              icon={{
-                path: google.maps.SymbolPath.CIRCLE,
-                fillColor: '#d2691e',
-                fillOpacity: 1,
-                strokeColor: '#fff8ed',
-                strokeWeight: 3,
-                scale: 12,
-              }}
-            >
-              {activeMarker === shop.id && (
-                <InfoWindow
-                  position={{ lat: shop.latitude, lng: shop.longitude }}
-                  onCloseClick={() => setActiveMarker(null)}
-                >
-                  <div className="info-window-content">
-                    <strong>{shop.name}</strong>
-                    <br />
-                    {shop.address}
-                  </div>
-                </InfoWindow>
-              )}
-            </Marker>
-          ))}
+      <GoogleMapReact
+        mapContainerStyle={mapContainerStyle}
+        center={center}
+        zoom={DEFAULT_ZOOM}
+        onLoad={onLoad}
+        onUnmount={onUnmount}
+        options={mapOptions}
+      >
+        {/* Shop Markers */}
+        {shops.map(shop => (
+          <Marker
+            key={shop.id}
+            position={{ lat: shop.latitude, lng: shop.longitude }}
+            onClick={() => handleMarkerClick(shop)}
+            icon={{
+              path: google.maps.SymbolPath.CIRCLE,
+              fillColor: '#d2691e',
+              fillOpacity: 1,
+              strokeColor: '#fff8ed',
+              strokeWeight: 3,
+              scale: 12,
+            }}
+          >
+            {activeMarker === shop.id && (
+              <InfoWindow
+                position={{ lat: shop.latitude, lng: shop.longitude }}
+                onCloseClick={() => setActiveMarker(null)}
+              >
+                <div className="info-window-content">
+                  <strong>{shop.name}</strong>
+                  <br />
+                  {shop.address}
+                </div>
+              </InfoWindow>
+            )}
+          </Marker>
+        ))}
 
-          {/* User Location Marker */}
-          {userLocation && (
-            <Marker
-              position={{ lat: userLocation.lat, lng: userLocation.lng }}
-              icon={{
-                path: google.maps.SymbolPath.CIRCLE,
-                fillColor: '#10b981',
-                fillOpacity: 1,
-                strokeColor: '#ffffff',
-                strokeWeight: 3,
-                scale: 10,
-              }}
-              title="現在地"
-            />
-          )}
-        </GoogleMapReact>
-      </LoadScript>
+        {/* User Location Marker */}
+        {userLocation && (
+          <Marker
+            position={{ lat: userLocation.lat, lng: userLocation.lng }}
+            icon={{
+              path: google.maps.SymbolPath.CIRCLE,
+              fillColor: '#10b981',
+              fillOpacity: 1,
+              strokeColor: '#ffffff',
+              strokeWeight: 3,
+              scale: 10,
+            }}
+            title="現在地"
+          />
+        )}
+      </GoogleMapReact>
 
       <button
         onClick={goToCurrentLocation}

@@ -20,6 +20,7 @@ import {
   FilterAltOff as FilterAltOffIcon,
   BubbleChart as BubbleChartIcon,
 } from '@mui/icons-material';
+import { LoadScript } from '@react-google-maps/api';
 import './App.css';
 import GoogleMap from './components/GoogleMap';
 import ShopCard from './components/ShopCard';
@@ -35,6 +36,31 @@ import { API_ENDPOINTS, GEOLOCATION_CONFIG, UI_CONFIG, FALLBACK_SHOPS } from './
 
 function App() {
   const theme = useTheme();
+  const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
+
+  if (!apiKey) {
+    return (
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100vh',
+          bgcolor: 'background.default',
+          p: 3,
+        }}
+      >
+        <Paper sx={{ p: 4, maxWidth: 500 }}>
+          <Typography variant="h5" color="error" gutterBottom>
+            Google Maps API key is not configured
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
+            Please set VITE_GOOGLE_MAPS_API_KEY in your environment variables.
+          </Typography>
+        </Paper>
+      </Box>
+    );
+  }
   const [shops, setShops] = useState<CurryShop[]>([]);
   const [filteredShops, setFilteredShops] = useState<CurryShop[]>([]);
   const [selectedShop, setSelectedShop] = useState<CurryShop | null>(null);
@@ -194,14 +220,15 @@ function App() {
   }
 
   return (
-    <Box
-      sx={{
-        background: 'linear-gradient(135deg, #faf7f2 0%, #f5f1ea 50%, #ede4d3 100%)',
-        minHeight: '100vh',
-        pb: 4,
-      }}
-    >
-      <Container maxWidth="xl" sx={{ pt: 3 }}>
+    <LoadScript googleMapsApiKey={apiKey}>
+      <Box
+        sx={{
+          background: 'linear-gradient(135deg, #faf7f2 0%, #f5f1ea 50%, #ede4d3 100%)',
+          minHeight: '100vh',
+          pb: 4,
+        }}
+      >
+        <Container maxWidth="xl" sx={{ pt: 3 }}>
         {/* Header */}
         <Paper
           elevation={0}
@@ -518,14 +545,15 @@ function App() {
         </Paper>
       </Container>
 
-      {showUserRegistration && (
-        <UserRegistrationForm
-          onRegister={handleUserRegistration}
-          onCancel={() => setShowUserRegistration(false)}
-          isLoading={registrationLoading}
-        />
-      )}
-    </Box>
+        {showUserRegistration && (
+          <UserRegistrationForm
+            onRegister={handleUserRegistration}
+            onCancel={() => setShowUserRegistration(false)}
+            isLoading={registrationLoading}
+          />
+        )}
+      </Box>
+    </LoadScript>
   );
 }
 
