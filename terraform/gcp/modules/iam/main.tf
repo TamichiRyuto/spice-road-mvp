@@ -38,6 +38,7 @@ resource "google_project_iam_member" "deployer_permissions" {
     "roles/iam.serviceAccountAdmin",
     "roles/iam.workloadIdentityPoolAdmin",
     "roles/serviceusage.serviceUsageAdmin",
+    "roles/resourcemanager.projectIamAdmin",
   ])
 
   project = var.project_id
