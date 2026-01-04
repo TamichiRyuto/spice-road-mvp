@@ -31,7 +31,7 @@ resource "google_project_iam_member" "deployer_permissions" {
     "roles/run.admin",
     "roles/storage.admin",
     "roles/iam.serviceAccountUser",
-    "roles/artifactregistry.writer",
+    "roles/artifactregistry.admin",
     "roles/cloudsql.admin",
     "roles/redis.admin",
     "roles/secretmanager.admin",
