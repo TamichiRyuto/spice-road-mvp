@@ -1,8 +1,8 @@
-# 🍛 スパイスカレー評価マップ
+# スパイスカレー評価マップ
 
 スパイスカレー店を「辛さ」「刺激」「香り」の3パラメータで評価し、GoogleMap上でスペクトル図として表示するWebアプリケーションです。
 
-## 🚀 機能
+## 機能
 
 - **3パラメータ評価システム**
   - 辛さ (Spiciness): 0-10
@@ -13,7 +13,7 @@
 - **GoogleMap統合**: 店舗位置をマップ上に表示
 - **レスポンシブUI**: デスクトップ・モバイル対応
 
-## 🏗️ アーキテクチャ
+## アーキテクチャ
 
 ```
 spice-param-app/
@@ -23,7 +23,7 @@ spice-param-app/
 └── docker-compose.yml # Docker構成
 ```
 
-## 🐳 Docker Composeでの起動
+## Docker Composeでの起動
 
 ```bash
 # プロジェクトディレクトリに移動
@@ -36,7 +36,7 @@ docker-compose up --build
 docker-compose up -d --build
 ```
 
-## 🌐 アクセス方法
+## アクセス方法
 
 起動後、以下のURLでアクセスできます：
 
@@ -44,7 +44,7 @@ docker-compose up -d --build
 - **API サーバー**: http://localhost:3001
 - **データベース**: http://localhost:8080/shops.json
 
-## 🔧 開発環境での実行
+## 開発環境での実行
 
 ### フロントエンド
 
@@ -62,7 +62,7 @@ npm install
 npm run dev
 ```
 
-## 📊 サンプルデータ
+## サンプルデータ
 
 `database/shops.json`に以下の店舗データが含まれています：
 
@@ -73,7 +73,7 @@ npm run dev
 - バランス亭 (銀座)
 - 香り工房 (浅草)
 
-## 🗺️ Google Maps API
+## Google Maps API
 
 デモ環境では`DEMO_API_KEY`を使用していますが、実際の地図を表示するには：
 
@@ -81,7 +81,7 @@ npm run dev
 2. APIキーを取得
 3. `docker-compose.yml`の`REACT_APP_GOOGLE_MAPS_API_KEY`を更新
 
-## 🛠️ 技術スタック
+## 技術スタック
 
 ### フロントエンド
 - React 18
@@ -99,13 +99,13 @@ npm run dev
 - Docker & Docker Compose
 - Nginx (静的ファイル配信)
 
-## 🎯 使い方
+## 使い方
 
 1. マップ上のカレー店アイコンをクリック
 2. 右側の店舗一覧からカードを選択
 3. スペクトル図で各店舗の辛さ・刺激・香りを比較
 4. お好みの評価パターンの店舗を発見！
 
-## 📝 ライセンス
+## ライセンス
 
 MIT License

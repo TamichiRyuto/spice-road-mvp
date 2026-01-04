@@ -140,6 +140,7 @@ module "cloud_build" {
   cpp_api_subdirectory        = "cpp-api"
   frontend_subdirectory       = "frontend"
   google_maps_api_key         = var.google_maps_api_key
+  # Use predictable Cloud Run URL pattern for frontend build
   cpp_api_url                 = "https://${var.app_name}-cpp-api-${var.environment}-gpxy5envpq-dt.a.run.app"
 
   labels = var.labels
@@ -213,11 +214,11 @@ module "cloud_run_frontend" {
   service_account_email   = module.iam.service_account_email
   labels                  = merge(var.labels, { component = "frontend" })
 
-  env_vars = {
-    # Frontend calls API via /api path
-    REACT_APP_API_URL           = "/api"
-    REACT_APP_GOOGLE_MAPS_API_KEY = var.google_maps_api_key
-  }
+  # Disable health checks for SPA frontend
+  enable_health_checks    = false
+
+  # No runtime environment variables needed - all config is baked into the build
+  env_vars = {}
 
   depends_on = [
     google_project_service.required_apis,

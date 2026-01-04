@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-echo "🗄️  Initializing database schema..."
+echo "Initializing database schema..."
 
 # Set PGPASSWORD environment variable for psql
 export PGPASSWORD="$DB_PASSWORD"
@@ -10,7 +10,7 @@ export PGPASSWORD="$DB_PASSWORD"
 echo "Waiting for database connection..."
 for i in {1..30}; do
   if psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -c '\q' 2>/dev/null; then
-    echo "✅ Database connection successful"
+    echo "Database connection successful"
     break
   fi
   echo "Waiting for database... ($i/30)"
@@ -25,8 +25,8 @@ psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -f /app/schema.sql
 echo "Importing shop data..."
 psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -f /app/import_shops.sql
 
-echo "✅ Database schema and data initialized successfully"
+echo "Database schema and data initialized successfully"
 
 # Start the application
-echo "🚀 Starting API server..."
+echo "Starting API server..."
 exec /app/spice_curry_api_server

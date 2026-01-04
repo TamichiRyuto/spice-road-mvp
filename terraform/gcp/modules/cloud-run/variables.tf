@@ -82,3 +82,15 @@ variable "cloud_sql_instances" {
   type        = list(string)
   default     = []
 }
+
+variable "enable_health_checks" {
+  description = "Enable health check probes (startup and liveness)"
+  type        = bool
+  default     = true
+}
+
+variable "health_check_path" {
+  description = "Path for health check endpoint"
+  type        = string
+  default     = "/health"
+}

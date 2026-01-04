@@ -14,17 +14,13 @@ resource "null_resource" "build_cpp_api" {
   provisioner "local-exec" {
     command = <<-EOT
       set -e
-      TEMP_DIR=$(mktemp -d)
-      echo "Cloning repository to $TEMP_DIR..."
-      git clone --depth 1 --branch ${var.git_ref} https://github.com/${var.github_repository}.git $TEMP_DIR
-      cd $TEMP_DIR/${var.cpp_api_subdirectory}
-      echo "Building C++ API using cloudbuild.yaml..."
+      echo "Building API using cpp-api/cloudbuild.yaml..."
+      cd ${path.root}/../../cpp-api
       gcloud builds submit \
         --project=${var.project_id} \
         --config=cloudbuild.yaml \
         --substitutions=_IMAGE_NAME=${var.artifact_registry_location}-docker.pkg.dev/${var.project_id}/${var.repository_id}/cpp-api:latest \
         .
-      rm -rf $TEMP_DIR
     EOT
   }
 
@@ -40,20 +36,16 @@ resource "null_resource" "build_frontend" {
     git_ref = var.git_ref
   }
 
-  provisioner "local-exec" {
+   provisioner "local-exec" {
     command = <<-EOT
       set -e
-      TEMP_DIR=$(mktemp -d)
-      echo "Cloning repository to $TEMP_DIR..."
-      git clone --depth 1 --branch ${var.git_ref} https://github.com/${var.github_repository}.git $TEMP_DIR
-      cd $TEMP_DIR/${var.frontend_subdirectory}
-      echo "Building Frontend using cloudbuild.yaml..."
+      echo "Building Frontend using frontend/cloudbuild.yaml..."
+      cd ${path.root}/../../frontend
       gcloud builds submit \
         --project=${var.project_id} \
         --config=cloudbuild.yaml \
-        --substitutions=_IMAGE_NAME=${var.artifact_registry_location}-docker.pkg.dev/${var.project_id}/${var.repository_id}/frontend:latest,_VITE_GOOGLE_MAPS_API_KEY=${var.google_maps_api_key},_VITE_API_URL=${var.cpp_api_url} \
+        --substitutions=_IMAGE_NAME=${var.artifact_registry_location}-docker.pkg.dev/${var.project_id}/${var.repository_id}/frontend:latest \
         .
-      rm -rf $TEMP_DIR
     EOT
   }
 

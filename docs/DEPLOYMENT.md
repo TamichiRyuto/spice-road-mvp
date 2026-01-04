@@ -2,7 +2,7 @@
 
 このドキュメントでは、Spice Road MVPをTerraformを使ってGoogle Cloud Runにデプロイする手順を説明します。
 
-## 📋 概要
+## 概要
 
 このプロジェクトはTerraformを使用してインフラをコード化(IaC)しています。手動でのgcloudコマンド実行は不要です。
 
@@ -23,7 +23,7 @@
 
 ---
 
-## 🚀 クイックスタート
+## クイックスタート
 
 ### 1. asdfとTerraformのセットアップ
 
@@ -177,7 +177,7 @@ open $(terraform output -raw frontend_service_url)
 
 ---
 
-## 📚 詳細ドキュメント
+## 詳細ドキュメント
 
 より詳しい手順や設定については、以下のドキュメントを参照してください：
 
@@ -187,7 +187,7 @@ open $(terraform output -raw frontend_service_url)
 
 ---
 
-## 🏗️ アーキテクチャ
+## アーキテクチャ
 
 ```
 Internet
@@ -210,7 +210,7 @@ Internet
 
 ---
 
-## 💰 料金について
+## 料金について
 
 Cloud Runは使用量ベースの課金です:
 - 0リクエスト時: ほぼ無料（最小インスタンス0）
@@ -221,7 +221,7 @@ Cloud Runは使用量ベースの課金です:
 
 ---
 
-## 🔧 トラブルシューティング
+## トラブルシューティング
 
 ### エラー: "terraform: command not found"
 
@@ -255,7 +255,7 @@ gcloud run logs read spice-road-frontend --region asia-northeast1 --limit 50
 
 ---
 
-## 🧹 インフラの削除
+## インフラの削除
 
 すべてのリソースを削除する場合：
 
@@ -264,11 +264,11 @@ cd terraform/gcp
 ./scripts/tf-destroy.sh
 ```
 
-**⚠️ 警告**: この操作は元に戻せません。すべてのCloud Runサービス、Cloud SQL、Redis、IAMリソースが削除されます。
+**警告**: この操作は元に戻せません。すべてのCloud Runサービス、Cloud SQL、Redis、IAMリソースが削除されます。
 
 ---
 
-## 📖 参考資料
+## 参考資料
 
 - [Terraform公式ドキュメント](https://www.terraform.io/docs)
 - [Google Cloud Run Documentation](https://cloud.google.com/run/docs)

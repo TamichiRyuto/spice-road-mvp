@@ -32,28 +32,34 @@ resource "google_cloud_run_v2_service" "main" {
       }
 
       # Startup probe - give more time for C++ applications
-      startup_probe {
-        initial_delay_seconds = 0
-        timeout_seconds       = 10
-        period_seconds        = 10
-        failure_threshold     = 30  # 30 * 10s = 5 minutes max startup time
+      dynamic "startup_probe" {
+        for_each = var.enable_health_checks ? [1] : []
+        content {
+          initial_delay_seconds = 0
+          timeout_seconds       = 10
+          period_seconds        = 10
+          failure_threshold     = 30  # 30 * 10s = 5 minutes max startup time
 
-        http_get {
-          path = "/health"
-          port = var.port
+          http_get {
+            path = var.health_check_path
+            port = var.port
+          }
         }
       }
 
       # Liveness probe
-      liveness_probe {
-        initial_delay_seconds = 0
-        timeout_seconds       = 5
-        period_seconds        = 30
-        failure_threshold     = 3
+      dynamic "liveness_probe" {
+        for_each = var.enable_health_checks ? [1] : []
+        content {
+          initial_delay_seconds = 0
+          timeout_seconds       = 5
+          period_seconds        = 30
+          failure_threshold     = 3
 
-        http_get {
-          path = "/health"
-          port = var.port
+          http_get {
+            path = var.health_check_path
+            port = var.port
+          }
         }
       }
 

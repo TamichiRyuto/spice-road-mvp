@@ -25,7 +25,7 @@
 std::atomic<bool> running{true};
 
 void signal_handler(int signal) {
-    std::println("🛑 Received signal {}, shutting down server gracefully...", signal);
+    std::println("Received signal {}, shutting down server gracefully...", signal);
     running = false;
 }
 

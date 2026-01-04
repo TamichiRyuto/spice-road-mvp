@@ -15,7 +15,7 @@ YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
-echo -e "${GREEN}📋 Terraform Plan Wrapper${NC}"
+echo -e "${GREEN} Terraform Plan Wrapper${NC}"
 echo ""
 
 # Change to terraform directory
@@ -23,32 +23,32 @@ cd "$TERRAFORM_DIR"
 
 # Load .env file if it exists
 if [ -f .env ]; then
-    echo -e "${GREEN}✓ Loading environment variables from .env${NC}"
+    echo -e "${GREEN} Loading environment variables from .env${NC}"
 
     # Source .env file (variables already have 'export' prefix)
     source .env
 
     # Validate required variables
     if [ -z "$GOOGLE_PROJECT" ]; then
-        echo -e "${RED}✗ Error: GOOGLE_PROJECT is not set in .env${NC}"
+        echo -e "${RED} Error: GOOGLE_PROJECT is not set in .env${NC}"
         echo "  Please copy .env.example to .env and configure it."
         exit 1
     fi
 
-    echo -e "${GREEN}✓ Using GCP Project: $GOOGLE_PROJECT${NC}"
+    echo -e "${GREEN} Using GCP Project: $GOOGLE_PROJECT${NC}"
 
     if [ -n "$GOOGLE_APPLICATION_CREDENTIALS" ]; then
         if [ -f "$GOOGLE_APPLICATION_CREDENTIALS" ]; then
-            echo -e "${GREEN}✓ Using service account: $GOOGLE_APPLICATION_CREDENTIALS${NC}"
+            echo -e "${GREEN} Using service account: $GOOGLE_APPLICATION_CREDENTIALS${NC}"
         else
-            echo -e "${RED}✗ Error: Service account key file not found: $GOOGLE_APPLICATION_CREDENTIALS${NC}"
+            echo -e "${RED} Error: Service account key file not found: $GOOGLE_APPLICATION_CREDENTIALS${NC}"
             exit 1
         fi
     else
-        echo -e "${YELLOW}ℹ Using gcloud application default credentials${NC}"
+        echo -e "${YELLOW} Using gcloud application default credentials${NC}"
     fi
 else
-    echo -e "${RED}✗ Error: .env file not found${NC}"
+    echo -e "${RED} Error: .env file not found${NC}"
     echo "  Please copy .env.example to .env and configure your GCP credentials"
     exit 1
 fi
@@ -56,14 +56,14 @@ fi
 # Check if terraform is initialized
 if [ ! -d .terraform ]; then
     echo ""
-    echo -e "${YELLOW}⚠ Terraform not initialized. Running init first...${NC}"
+    echo -e "${YELLOW} Terraform not initialized. Running init first...${NC}"
     echo ""
     ./scripts/tf-init.sh
     echo ""
 fi
 
 echo ""
-echo -e "${GREEN}🔍 Running terraform plan...${NC}"
+echo -e "${GREEN} Running terraform plan...${NC}"
 echo ""
 
 # Run terraform plan with any additional arguments
@@ -73,4 +73,4 @@ terraform plan \
     "$@"
 
 echo ""
-echo -e "${GREEN}✅ Terraform plan complete!${NC}"
+echo -e "${GREEN} Terraform plan complete!${NC}"

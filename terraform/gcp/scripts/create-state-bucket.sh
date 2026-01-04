@@ -16,7 +16,7 @@ RED='\033[0;31m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-echo -e "${BLUE}🪣 Terraform State Bucket Creator${NC}"
+echo -e "${BLUE}Terraform State Bucket Creator${NC}"
 echo ""
 
 # Change to terraform directory
@@ -24,17 +24,17 @@ cd "$TERRAFORM_DIR"
 
 # Load .env file if it exists
 if [ -f .env ]; then
-    echo -e "${GREEN}✓ Loading environment variables from .env${NC}"
+    echo -e "${GREEN}Loading environment variables from .env${NC}"
     source .env
 else
-    echo -e "${YELLOW}⚠ .env file not found, using gcloud config${NC}"
+    echo -e "${YELLOW}.env file not found, using gcloud config${NC}"
 fi
 
 # Get project ID
 PROJECT_ID="${GOOGLE_PROJECT:-$(gcloud config get-value project 2>/dev/null)}"
 
 if [ -z "$PROJECT_ID" ]; then
-    echo -e "${RED}✗ Error: Project ID not found${NC}"
+    echo -e "${RED}Error: Project ID not found${NC}"
     echo "  Please set GOOGLE_PROJECT in .env or run: gcloud config set project YOUR_PROJECT_ID"
     exit 1
 fi
@@ -58,7 +58,7 @@ echo ""
 
 # Check if bucket already exists
 if gsutil ls -b "gs://$BUCKET_NAME" &>/dev/null; then
-    echo -e "${YELLOW}⚠ Bucket already exists: gs://$BUCKET_NAME${NC}"
+    echo -e "${YELLOW}Bucket already exists: gs://$BUCKET_NAME${NC}"
     echo ""
     echo -e "${GREEN}You can initialize Terraform with:${NC}"
     echo -e "  ./scripts/tf-init.sh -backend-config=\"bucket=$BUCKET_NAME\""
@@ -77,17 +77,17 @@ if [[ ! $REPLY =~ ^[Yy]$ ]]; then
 fi
 
 echo ""
-echo -e "${GREEN}🚀 Creating bucket...${NC}"
+echo -e "${GREEN}Creating bucket...${NC}"
 
 # Create the bucket
 gsutil mb -p "$PROJECT_ID" -l "$REGION" -b on "gs://$BUCKET_NAME"
 
 # Enable versioning for state file protection
-echo -e "${GREEN}✓ Enabling versioning...${NC}"
+echo -e "${GREEN}Enabling versioning...${NC}"
 gsutil versioning set on "gs://$BUCKET_NAME"
 
 # Set lifecycle rule to delete old versions after 30 days
-echo -e "${GREEN}✓ Setting lifecycle rules...${NC}"
+echo -e "${GREEN}Setting lifecycle rules...${NC}"
 cat > /tmp/lifecycle.json << 'EOF'
 {
   "lifecycle": {
@@ -107,11 +107,11 @@ gsutil lifecycle set /tmp/lifecycle.json "gs://$BUCKET_NAME"
 rm /tmp/lifecycle.json
 
 # Set uniform bucket-level access
-echo -e "${GREEN}✓ Setting uniform bucket-level access...${NC}"
+echo -e "${GREEN}Setting uniform bucket-level access...${NC}"
 gsutil uniformbucketlevelaccess set on "gs://$BUCKET_NAME"
 
 echo ""
-echo -e "${GREEN}✅ Bucket created successfully!${NC}"
+echo -e "${GREEN}Bucket created successfully!${NC}"
 echo ""
 echo -e "${BLUE}Next steps:${NC}"
 echo ""

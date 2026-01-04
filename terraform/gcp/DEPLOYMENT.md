@@ -85,9 +85,9 @@ gcloud auth application-default print-access-token
 ```
 
 **メリット**:
-- ✅ サービスアカウントキー不要
-- ✅ 自動的に認証情報を更新
-- ✅ セキュアな認証方法
+- サービスアカウントキー不要
+- 自動的に認証情報を更新
+- セキュアな認証方法
 
 **参考**: [Authentication for Terraform | Google Cloud](https://cloud.google.com/docs/terraform/authentication)
 
