@@ -116,7 +116,7 @@ const GoogleMap = ({ shops, onShopSelect, selectedShop }: GoogleMapProps) => {
 
     // Add custom location control
     const locationControl = createLocationControl(map);
-    map.controls[google.maps.ControlPosition.RIGHT_TOP].push(locationControl);
+    map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(locationControl);
   }, [createLocationControl]);
 
   const onUnmount = useCallback(() => {

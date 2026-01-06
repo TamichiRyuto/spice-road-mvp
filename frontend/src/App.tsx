@@ -286,8 +286,8 @@ function App() {
             {/* Hero Section */}
             <Stack direction="row" spacing={3} alignItems="center" sx={{ mt: 1 }}>
               <Avatar
-                src="/spice-deer.webp"
-                alt="Spice Your Nara"
+                src="/logo512.png"
+                alt="Spice Road Nara"
                 sx={{
                   width: { xs: 80, sm: 100, md: 120 },
                   height: { xs: 80, sm: 100, md: 120 },
