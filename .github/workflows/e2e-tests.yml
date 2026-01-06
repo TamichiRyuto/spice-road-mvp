@@ -1,34 +1,29 @@
-name: E2E Tests and Deployment
+name: E2E Tests
 
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+  # Run E2E tests after deploy.yml workflow completes
+  workflow_run:
+    workflows: ["Deploy to Google Cloud Run by Terraform"]
+    types:
+      - completed
+  # Allow manual trigger for testing
   workflow_dispatch:
-
-env:
-  # GCP configuration
-  PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
-  REGION: ${{ vars.GCP_REGION }}
-
-  # Terraform backend
-  TF_BACKEND_BUCKET: ${{ vars.TF_BACKEND_BUCKET }}
-  TF_WORKSPACE: ${{ vars.TF_WORKSPACE }}
-
-  # Terraform variables (TF_VAR_ prefix for auto-loading)
-  TF_VAR_project_id: ${{ vars.GCP_PROJECT_ID }}
-  TF_VAR_region: ${{ vars.GCP_REGION }}
-  TF_VAR_environment: ${{ vars.ENVIRONMENT || 'dev' }}
-  TF_VAR_app_name: spice-road-mvp
-  TF_VAR_google_maps_api_key: ${{ secrets.GOOGLE_MAPS_API_KEY }}
-  TF_VAR_github_repository: ${{ github.repository }}
-  TF_VAR_enable_cloud_build: true
+    inputs:
+      frontend_url:
+        description: 'Frontend URL'
+        required: false
+        default: 'https://spice-road-mvp-frontend-dev-gpxy5envpq-dt.a.run.app'
+      api_url:
+        description: 'API URL'
+        required: false
+        default: 'https://spice-road-mvp-cpp-api-dev-gpxy5envpq-dt.a.run.app'
 
 jobs:
   # Job 1: Local E2E Tests (docker-compose environment)
+  # Only run on manual dispatch
   e2e-local:
     name: E2E Tests (Local)
+    if: ${{ github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -106,12 +101,12 @@ jobs:
       if: always()
       run: docker-compose down -v
 
-  # Job 2: Deploy to Cloud Run (existing deployment logic)
-  deploy:
-    name: Deploy to Cloud Run
-    needs: e2e-local
+  # Job 2: Get Cloud Run URLs from Terraform
+  get-urls:
+    name: Get Deployment URLs
+    # Only run if deploy workflow succeeded
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 30
     environment: gcp-kototech-dev
     permissions:
       contents: read
@@ -140,27 +135,9 @@ jobs:
     - name: Terraform Init
       run: |
         cd terraform/gcp
-        terraform init -backend-config="bucket=$TF_BACKEND_BUCKET"
+        terraform init -backend-config="bucket=${{ vars.TF_BACKEND_BUCKET }}"
 
-    - name: Terraform Plan
-      run: |
-        cd terraform/gcp
-        terraform plan \
-          -target=module.artifact_registry \
-          -target=module.cloud_build \
-          -target=module.cloud_run_cpp_api \
-          -target=module.cloud_run_frontend
-
-    - name: Terraform Apply
-      run: |
-        cd terraform/gcp
-        terraform apply -auto-approve \
-          -target=module.artifact_registry \
-          -target=module.cloud_build \
-          -target=module.cloud_run_cpp_api \
-          -target=module.cloud_run_frontend
-
-    - name: Get deployment URLs
+    - name: Get deployment URLs from Terraform
       id: get-urls
       run: |
         cd terraform/gcp
@@ -187,7 +164,7 @@ jobs:
   # Job 3: Cloud Run E2E Tests (deployed environment)
   e2e-cloud-run:
     name: E2E Tests (Cloud Run)
-    needs: deploy
+    needs: get-urls
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -211,9 +188,9 @@ jobs:
         cd e2e
         npm run test:cloud-run
       env:
-        BASE_URL: ${{ needs.deploy.outputs.frontend_url }}
-        FRONTEND_URL: ${{ needs.deploy.outputs.frontend_url }}
-        API_URL: ${{ needs.deploy.outputs.api_url }}
+        BASE_URL: ${{ needs.get-urls.outputs.frontend_url }}
+        FRONTEND_URL: ${{ needs.get-urls.outputs.frontend_url }}
+        API_URL: ${{ needs.get-urls.outputs.api_url }}
         CI: true
 
     - name: Upload test results
@@ -242,8 +219,8 @@ jobs:
             const stats = results.stats || {};
 
             comment += `**Deployment URLs:**\n`;
-            comment += `- Frontend: ${{ needs.deploy.outputs.frontend_url }}\n`;
-            comment += `- API: ${{ needs.deploy.outputs.api_url }}\n\n`;
+            comment += `- Frontend: ${{ needs.get-urls.outputs.frontend_url }}\n`;
+            comment += `- API: ${{ needs.get-urls.outputs.api_url }}\n\n`;
             comment += `**Test Summary:**\n`;
             comment += `- Total: ${stats.expected || 0} tests\n`;
             comment += `- Passed: ${stats.expected || 0}\n`;
@@ -263,23 +240,22 @@ jobs:
   # Job 4: Summary
   summary:
     name: Test Summary
-    needs: [e2e-local, deploy, e2e-cloud-run]
+    needs: [get-urls, e2e-cloud-run]
     runs-on: ubuntu-latest
     if: always()
 
     steps:
     - name: Generate summary
       run: |
-        echo "# E2E Test and Deployment Summary" >> $GITHUB_STEP_SUMMARY
+        echo "# E2E Test Summary" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "## Job Status" >> $GITHUB_STEP_SUMMARY
-        echo "- Local E2E Tests: ${{ needs.e2e-local.result }}" >> $GITHUB_STEP_SUMMARY
-        echo "- Deployment: ${{ needs.deploy.result }}" >> $GITHUB_STEP_SUMMARY
+        echo "- Get URLs: ${{ needs.get-urls.result }}" >> $GITHUB_STEP_SUMMARY
         echo "- Cloud Run E2E Tests: ${{ needs.e2e-cloud-run.result }}" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
 
-        if [[ "${{ needs.deploy.result }}" == "success" ]]; then
+        if [[ "${{ needs.get-urls.result }}" == "success" ]]; then
           echo "## Deployment URLs" >> $GITHUB_STEP_SUMMARY
-          echo "- Frontend: ${{ needs.deploy.outputs.frontend_url }}" >> $GITHUB_STEP_SUMMARY
-          echo "- API: ${{ needs.deploy.outputs.api_url }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Frontend: ${{ needs.get-urls.outputs.frontend_url }}" >> $GITHUB_STEP_SUMMARY
+          echo "- API: ${{ needs.get-urls.outputs.api_url }}" >> $GITHUB_STEP_SUMMARY
         fi
