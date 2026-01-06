@@ -176,9 +176,6 @@ std::string Router::create_response(const std::string& body, int status_code, co
         "HTTP/1.1 {} {}\r\n"
         "Content-Type: {}\r\n"
         "Content-Length: {}\r\n"
-        "Access-Control-Allow-Origin: *\r\n"
-        "Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS\r\n"
-        "Access-Control-Allow-Headers: Content-Type, Authorization\r\n"
         "Connection: close\r\n"
         "\r\n"
         "{}",
