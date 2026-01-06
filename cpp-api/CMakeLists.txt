@@ -15,7 +15,7 @@ find_package(Threads REQUIRED)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(LIBPQXX REQUIRED libpqxx)
 
-# Google Test
+# Google Test and nlohmann_json
 include(FetchContent)
 FetchContent_Declare(
     googletest
@@ -23,7 +23,15 @@ FetchContent_Declare(
     GIT_TAG v1.15.2
 )
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-FetchContent_MakeAvailable(googletest)
+
+FetchContent_Declare(
+    nlohmann_json
+    GIT_REPOSITORY https://github.com/nlohmann/json.git
+    GIT_TAG v3.11.3
+)
+set(JSON_BuildTests OFF CACHE INTERNAL "")
+
+FetchContent_MakeAvailable(googletest nlohmann_json)
 enable_testing()
 
 # Check for C++26 features
@@ -59,6 +67,7 @@ set(SOURCES
     src/main.cpp
     src/repository/json_repository.cpp
     src/repository/postgres_shop_repository.cpp
+    src/repository/postgres_user_repository.cpp
     src/database/connection_pool.cpp
     src/service/shop_service.cpp
     src/service/user_service.cpp
@@ -69,6 +78,7 @@ set(SOURCES
 add_library(spice_db
     src/database/connection_pool.cpp
     src/repository/postgres_shop_repository.cpp
+    src/repository/postgres_user_repository.cpp
 )
 target_include_directories(spice_db PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/src
@@ -90,6 +100,7 @@ target_link_libraries(spice_curry_api_server
     STDEXEC::stdexec
     spice_db
     ${LIBPQXX_LIBRARIES}
+    nlohmann_json::nlohmann_json
 )
 target_compile_options(spice_curry_api_server PRIVATE
     -Wall -Wextra -Wpedantic
