@@ -78,6 +78,9 @@ set -e\n\
 echo "Starting nginx..."\n\
 nginx\n\
 echo "Nginx started successfully"\n\
+# Unset PORT so C++ server uses API_PORT (8080)\n\
+# nginx will listen on the original PORT (8081)\n\
+unset PORT\n\
 exec /app/init-db.sh\n\
 ' > /app/start.sh && chmod +x /app/start.sh
 

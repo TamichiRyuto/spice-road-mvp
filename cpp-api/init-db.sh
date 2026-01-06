@@ -27,6 +27,8 @@ psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -f /app/import_shop
 
 echo "Database schema and data initialized successfully"
 
-# Start the application
-echo "Starting API server..."
+# Start the application on port 8080 (internal)
+# nginx listens on port 8081 (external) and proxies to 8080
+echo "Starting API server on port 8080..."
+export API_PORT=8080
 exec /app/spice_curry_api_server
