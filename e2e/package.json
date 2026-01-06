@@ -1,0 +1,21 @@
+{
+  "name": "spice-road-e2e-tests",
+  "version": "1.0.0",
+  "description": "E2E tests for Spice Road MVP using Playwright",
+  "private": true,
+  "scripts": {
+    "test": "playwright test",
+    "test:local": "playwright test --project=local",
+    "test:cloud-run": "playwright test --project=cloud-run",
+    "test:debug": "playwright test --debug",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "report": "playwright show-report",
+    "codegen": "playwright codegen"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.0",
+    "@types/node": "^22.10.7",
+    "typescript": "^5.7.3"
+  }
+}

@@ -1,0 +1,285 @@
+name: E2E Tests and Deployment
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  # GCP configuration
+  PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+  REGION: ${{ vars.GCP_REGION }}
+
+  # Terraform backend
+  TF_BACKEND_BUCKET: ${{ vars.TF_BACKEND_BUCKET }}
+  TF_WORKSPACE: ${{ vars.TF_WORKSPACE }}
+
+  # Terraform variables (TF_VAR_ prefix for auto-loading)
+  TF_VAR_project_id: ${{ vars.GCP_PROJECT_ID }}
+  TF_VAR_region: ${{ vars.GCP_REGION }}
+  TF_VAR_environment: ${{ vars.ENVIRONMENT || 'dev' }}
+  TF_VAR_app_name: spice-road-mvp
+  TF_VAR_google_maps_api_key: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+  TF_VAR_github_repository: ${{ github.repository }}
+  TF_VAR_enable_cloud_build: true
+
+jobs:
+  # Job 1: Local E2E Tests (docker-compose environment)
+  e2e-local:
+    name: E2E Tests (Local)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Start services with docker-compose
+      run: |
+        docker-compose up -d
+        echo "Waiting for services to be healthy..."
+
+    - name: Wait for services to be ready
+      run: |
+        echo "Waiting for nginx..."
+        timeout 120 bash -c 'until curl -f -k https://localhost:10443/health 2>/dev/null; do sleep 2; done' || echo "Nginx health check timeout"
+
+        echo "Waiting for cpp-api..."
+        timeout 120 bash -c 'until curl -f http://localhost:8080/health 2>/dev/null; do sleep 2; done'
+
+        echo "Waiting for frontend..."
+        timeout 120 bash -c 'until curl -f http://localhost:3000 2>/dev/null; do sleep 2; done'
+
+        echo "Waiting for postgres..."
+        timeout 60 bash -c 'until docker-compose exec -T postgres pg_isready -U spice_user -d spice_road; do sleep 2; done'
+
+        echo "All services ready!"
+
+    - name: Show service logs
+      if: always()
+      run: |
+        echo "=== Nginx logs ==="
+        docker-compose logs --tail=50 nginx || true
+        echo "=== C++ API logs ==="
+        docker-compose logs --tail=50 cpp-api || true
+        echo "=== Frontend logs ==="
+        docker-compose logs --tail=50 frontend || true
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Install Playwright dependencies
+      run: |
+        cd e2e
+        npm install
+        npx playwright install --with-deps chromium
+
+    - name: Run local E2E tests
+      run: |
+        cd e2e
+        npm run test:local
+      env:
+        BASE_URL: http://localhost:10080
+        API_URL: http://localhost:8080
+        CI: true
+
+    - name: Upload test results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: playwright-results-local
+        path: |
+          e2e/playwright-report/
+          e2e/test-results/
+        retention-days: 7
+
+    - name: Stop docker-compose services
+      if: always()
+      run: docker-compose down -v
+
+  # Job 2: Deploy to Cloud Run (existing deployment logic)
+  deploy:
+    name: Deploy to Cloud Run
+    needs: e2e-local
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: gcp-kototech-dev
+    permissions:
+      contents: read
+      id-token: write
+    outputs:
+      api_url: ${{ steps.get-urls.outputs.API_URL }}
+      frontend_url: ${{ steps.get-urls.outputs.FRONTEND_URL }}
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+        service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_wrapper: false
+
+    - name: Terraform Init
+      run: |
+        cd terraform/gcp
+        terraform init -backend-config="bucket=$TF_BACKEND_BUCKET"
+
+    - name: Terraform Plan
+      run: |
+        cd terraform/gcp
+        terraform plan \
+          -target=module.artifact_registry \
+          -target=module.cloud_build \
+          -target=module.cloud_run_cpp_api \
+          -target=module.cloud_run_frontend
+
+    - name: Terraform Apply
+      run: |
+        cd terraform/gcp
+        terraform apply -auto-approve \
+          -target=module.artifact_registry \
+          -target=module.cloud_build \
+          -target=module.cloud_run_cpp_api \
+          -target=module.cloud_run_frontend
+
+    - name: Get deployment URLs
+      id: get-urls
+      run: |
+        cd terraform/gcp
+        API_URL=$(terraform output -raw cpp_api_service_url)
+        FRONTEND_URL=$(terraform output -raw frontend_service_url)
+        echo "API_URL=$API_URL" >> $GITHUB_OUTPUT
+        echo "FRONTEND_URL=$FRONTEND_URL" >> $GITHUB_OUTPUT
+        echo "API deployed at: $API_URL"
+        echo "Frontend deployed at: $FRONTEND_URL"
+
+    - name: Wait for deployment to be ready
+      run: |
+        API_URL="${{ steps.get-urls.outputs.API_URL }}"
+        FRONTEND_URL="${{ steps.get-urls.outputs.FRONTEND_URL }}"
+
+        echo "Waiting for API to respond..."
+        timeout 180 bash -c "until curl -f $API_URL/health 2>/dev/null; do sleep 5; done"
+
+        echo "Waiting for frontend to respond..."
+        timeout 180 bash -c "until curl -f $FRONTEND_URL 2>/dev/null; do sleep 5; done"
+
+        echo "Deployment is ready!"
+
+  # Job 3: Cloud Run E2E Tests (deployed environment)
+  e2e-cloud-run:
+    name: E2E Tests (Cloud Run)
+    needs: deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Install Playwright dependencies
+      run: |
+        cd e2e
+        npm install
+        npx playwright install --with-deps chromium
+
+    - name: Run Cloud Run E2E tests
+      run: |
+        cd e2e
+        npm run test:cloud-run
+      env:
+        BASE_URL: ${{ needs.deploy.outputs.frontend_url }}
+        FRONTEND_URL: ${{ needs.deploy.outputs.frontend_url }}
+        API_URL: ${{ needs.deploy.outputs.api_url }}
+        CI: true
+
+    - name: Upload test results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: playwright-results-cloud-run
+        path: |
+          e2e/playwright-report/
+          e2e/test-results/
+        retention-days: 30
+
+    - name: Comment test results on PR
+      if: github.event_name == 'pull_request' && always()
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          const resultsPath = 'e2e/test-results/results.json';
+
+          let comment = '## E2E Test Results (Cloud Run)\n\n';
+
+          if (fs.existsSync(resultsPath)) {
+            const results = JSON.parse(fs.readFileSync(resultsPath, 'utf8'));
+            const suites = results.suites || [];
+            const stats = results.stats || {};
+
+            comment += `**Deployment URLs:**\n`;
+            comment += `- Frontend: ${{ needs.deploy.outputs.frontend_url }}\n`;
+            comment += `- API: ${{ needs.deploy.outputs.api_url }}\n\n`;
+            comment += `**Test Summary:**\n`;
+            comment += `- Total: ${stats.expected || 0} tests\n`;
+            comment += `- Passed: ${stats.expected || 0}\n`;
+            comment += `- Failed: ${stats.unexpected || 0}\n`;
+            comment += `- Duration: ${stats.duration || 0}ms\n`;
+          } else {
+            comment += 'Test results not found.';
+          }
+
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: comment
+          });
+
+  # Job 4: Summary
+  summary:
+    name: Test Summary
+    needs: [e2e-local, deploy, e2e-cloud-run]
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+    - name: Generate summary
+      run: |
+        echo "# E2E Test and Deployment Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "## Job Status" >> $GITHUB_STEP_SUMMARY
+        echo "- Local E2E Tests: ${{ needs.e2e-local.result }}" >> $GITHUB_STEP_SUMMARY
+        echo "- Deployment: ${{ needs.deploy.result }}" >> $GITHUB_STEP_SUMMARY
+        echo "- Cloud Run E2E Tests: ${{ needs.e2e-cloud-run.result }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+
+        if [[ "${{ needs.deploy.result }}" == "success" ]]; then
+          echo "## Deployment URLs" >> $GITHUB_STEP_SUMMARY
+          echo "- Frontend: ${{ needs.deploy.outputs.frontend_url }}" >> $GITHUB_STEP_SUMMARY
+          echo "- API: ${{ needs.deploy.outputs.api_url }}" >> $GITHUB_STEP_SUMMARY
+        fi
