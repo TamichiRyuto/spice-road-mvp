@@ -169,7 +169,7 @@ module "cloud_run_cpp_api" {
   image                   = local.cpp_api_image_url
   memory                  = var.cpp_api_memory
   cpu                     = var.cpp_api_cpu
-  port                    = 8080
+  port                    = 8081  # nginx HTTP/2 proxy port
   allow_unauthenticated   = var.allow_unauthenticated
   service_account_email   = module.iam.service_account_email
   labels                  = merge(var.labels, { component = "cpp-api" })

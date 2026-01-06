@@ -32,11 +32,12 @@ RUN mkdir -p build && cd build && \
 # Production stage - use Debian bookworm base
 FROM debian:bookworm-slim
 
-# Install minimal runtime dependencies including postgresql-client
+# Install minimal runtime dependencies including postgresql-client and nginx
 RUN apt-get update && apt-get install -y \
     ca-certificates \
     curl \
     postgresql-client \
+    nginx \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy all necessary libraries from builder
@@ -69,6 +70,16 @@ COPY --from=builder /app/build/spice_curry_api_server /app/
 COPY schema.sql /app/
 COPY import_shops.sql /app/
 COPY init-db.sh /app/
+COPY nginx.production.conf /etc/nginx/nginx.conf
+
+# Create startup script for both nginx and C++ server
+RUN echo '#!/bin/bash\n\
+set -e\n\
+echo "Starting nginx..."\n\
+nginx\n\
+echo "Nginx started successfully"\n\
+exec /app/init-db.sh\n\
+' > /app/start.sh && chmod +x /app/start.sh
 
 # Make init script executable
 RUN chmod +x /app/init-db.sh
@@ -76,23 +87,29 @@ RUN chmod +x /app/init-db.sh
 # Set ownership
 RUN chown -R appuser:appuser /app
 
+# nginx needs to write to log files
+RUN mkdir -p /var/log/nginx && \
+    chown -R appuser:appuser /var/log/nginx && \
+    chown -R appuser:appuser /var/lib/nginx
+
 # Update library cache
 RUN ldconfig
 
 USER appuser
 
-# Expose port (Cloud Run will set PORT dynamically)
-EXPOSE 8080
+# Expose nginx port (8081 for HTTP/2) and C++ server port (8080 internal)
+EXPOSE 8081
 
 # Set environment variables
 ENV LOG_LEVEL=info
 ENV ENABLE_METRICS=true
+ENV PORT=8081
 # PostgreSQL connection will be set via Cloud Run environment variables:
 # DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD
 
-# Health check (Note: PORT may be different in Cloud Run)
+# Health check via nginx (which proxies to C++ server)
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-    CMD curl -f http://localhost:${PORT:-8080}/health || exit 1
+    CMD curl -f http://localhost:8081/health || exit 1
 
-# Run the application with database initialization
-CMD ["/app/init-db.sh"]
+# Run nginx and C++ server
+CMD ["/app/start.sh"]
