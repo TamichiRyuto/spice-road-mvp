@@ -21,6 +21,8 @@ import {
   BubbleChart as BubbleChartIcon,
 } from '@mui/icons-material';
 import { LoadScript } from '@react-google-maps/api';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
 import GoogleMap from './components/GoogleMap';
 import ShopCard from './components/ShopCard';
@@ -530,6 +532,8 @@ function App() {
           />
         )}
       </Box>
+
+      <ToastContainer />
     </LoadScript>
   );
 }

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { GoogleMap as GoogleMapReact, Marker, InfoWindow } from '@react-google-maps/api';
+import { toast } from 'react-toastify';
 import './css/GoogleMap.css';
 import { CurryShop } from '../types';
 
@@ -71,41 +72,97 @@ const GoogleMap = ({ shops, onShopSelect, selectedShop }: GoogleMapProps) => {
     icon.style.backgroundPosition = 'center';
     controlButton.appendChild(icon);
 
-    // Add click handler
+    // Add click handler with improved error handling and retry logic
     controlButton.addEventListener('click', () => {
       // Show loading state
       icon.style.opacity = '0.5';
 
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            const pos = {
-              lat: position.coords.latitude,
-              lng: position.coords.longitude,
-            };
-
-            setUserLocation(pos);
-            map.panTo(pos);
-            map.setZoom(16);
-
-            // Reset icon state
-            icon.style.opacity = '1';
-          },
-          (error) => {
-            console.error('Geolocation error:', error);
-            alert('位置情報の取得に失敗しました。ブラウザの設定を確認してください。');
-            icon.style.opacity = '1';
-          },
-          {
-            enableHighAccuracy: true,
-            timeout: 10000,
-            maximumAge: 0,
-          }
-        );
-      } else {
-        alert('このブラウザは位置情報に対応していません。');
+      if (!navigator.geolocation) {
+        toast.error('このブラウザは位置情報に対応していません。', {
+          position: 'bottom-center',
+          autoClose: 5000,
+        });
         icon.style.opacity = '1';
+        return;
       }
+
+      // Helper function to handle geolocation errors
+      const handleGeolocationError = (error: GeolocationPositionError) => {
+        let message: string;
+
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            message = '位置情報の利用が許可されていません。ブラウザの設定を確認してください。';
+            break;
+          case error.POSITION_UNAVAILABLE:
+            message = '位置情報を取得できませんでした。GPS信号を確認してください。';
+            break;
+          case error.TIMEOUT:
+            message = '位置情報の取得がタイムアウトしました。もう一度お試しください。';
+            break;
+          default:
+            message = '位置情報の取得に失敗しました。';
+        }
+
+        console.error('Geolocation error:', error);
+        toast.error(message, {
+          position: 'bottom-center',
+          autoClose: 5000,
+        });
+      };
+
+      // Retry logic for timeout errors
+      const getCurrentPositionWithRetry = (retries = 2): Promise<GeolocationPosition> => {
+        return new Promise((resolve, reject) => {
+          const attemptGetPosition = (attempt: number) => {
+            navigator.geolocation.getCurrentPosition(
+              resolve,
+              (error) => {
+                if (error.code === error.TIMEOUT && attempt < retries) {
+                  console.log(`Retrying geolocation (attempt ${attempt + 1}/${retries})...`);
+                  attemptGetPosition(attempt + 1);
+                } else {
+                  reject(error);
+                }
+              },
+              {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0,
+              }
+            );
+          };
+
+          attemptGetPosition(0);
+        });
+      };
+
+      // Get current position with retry
+      getCurrentPositionWithRetry()
+        .then((position) => {
+          const pos = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          };
+
+          setUserLocation(pos);
+          map.panTo(pos);
+          map.setZoom(16);
+
+          // Show success message with accuracy info
+          const accuracy = Math.round(position.coords.accuracy);
+          toast.success(`現在地を取得しました（精度: ${accuracy}m）`, {
+            position: 'bottom-center',
+            autoClose: 3000,
+          });
+
+          // Reset icon state
+          icon.style.opacity = '1';
+        })
+        .catch((error) => {
+          handleGeolocationError(error);
+          icon.style.opacity = '1';
+        });
     });
 
     return controlButton;

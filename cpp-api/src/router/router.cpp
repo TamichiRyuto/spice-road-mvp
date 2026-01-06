@@ -107,12 +107,36 @@ std::string Router::handle_get_users() {
 }
 
 std::string Router::handle_post_user(std::string_view body) {
-    // TODO: ユーザー登録処理実装
-    // 現在は簡易レスポンス
-    return create_json_response(
-        R"({"id":"new-user","username":"testuser","email":"test@example.com","createdAt":"2024-01-01T00:00:00Z"})",
-        201
-    );
+    if (!user_service_) {
+        return create_error_response("User service not available", 503, "SERVICE_UNAVAILABLE");
+    }
+
+    if (body.empty()) {
+        return create_error_response("Request body is required", 400, "INVALID_REQUEST");
+    }
+
+    // UserServiceでユーザー登録処理
+    auto result = user_service_->create_user_from_json(std::string(body));
+
+    if (!result) {
+        // エラーの種類に応じたステータスコード
+        std::string error_msg = result.error();
+
+        if (error_msg.find("already exists") != std::string::npos) {
+            // 重複エラー
+            return create_error_response("Registration failed", 409, "CONFLICT");
+        } else if (error_msg.find("Validation") != std::string::npos ||
+                   error_msg.find("Invalid") != std::string::npos) {
+            // バリデーションエラー
+            return create_error_response("Invalid input", 400, "VALIDATION_ERROR");
+        } else {
+            // その他のエラー
+            return create_error_response("Registration failed", 500, "INTERNAL_ERROR");
+        }
+    }
+
+    // 成功時は201 Created
+    return create_json_response(result.value(), 201);
 }
 
 std::string Router::handle_get_user_by_id(const std::string& user_id) {

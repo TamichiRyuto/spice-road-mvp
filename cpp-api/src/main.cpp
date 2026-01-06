@@ -20,6 +20,7 @@
 #include "service/shop_service.hpp"
 #include "service/user_service.hpp"
 #include "repository/postgres_shop_repository.hpp"
+#include "repository/postgres_user_repository.hpp"
 #include "database/connection_pool.hpp"
 
 std::atomic<bool> running{true};
@@ -109,10 +110,12 @@ int main() {
         auto shop_repository = std::make_shared<repository::PostgresShopRepository>(connection_pool);
         auto shop_service = std::make_shared<service::ShopService>(shop_repository);
 
-        // Note: UserRepository is not yet implemented for PostgreSQL
-        // For now, we'll pass nullptr for user_service
+        // PostgreSQL User Repository and Service
+        auto user_repository = std::make_shared<repository::PostgresUserRepository>(connection_pool);
+        auto user_service = std::make_shared<service::UserService>(user_repository);
+
         auto router = std::make_shared<router::Router>(
-            shop_service, nullptr, "", ""
+            shop_service, user_service, "", ""
         );
 
         std::println("✅ Application layers initialized (Clean Architecture + PostgreSQL)");
