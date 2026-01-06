@@ -13,7 +13,7 @@ resource "google_cloud_run_v2_service" "main" {
       image = var.image
 
       ports {
-        name           = "h2c"  # Use HTTP/2 cleartext (nginx handles this)
+        name           = "http1"  # Use HTTP/1.1 for Cloud Run->container (Cloud Run handles HTTP/2 externally)
         container_port = var.port
       }
 
