@@ -9,11 +9,16 @@ output "frontend_image_built" {
 }
 
 output "cpp_api_image_url" {
-  description = "URL of the built C++ API Docker image"
-  value       = var.enable_cpp_api_build ? "${var.artifact_registry_location}-docker.pkg.dev/${var.project_id}/${var.repository_id}/cpp-api:latest" : ""
+  description = "URL of the built C++ API Docker image with commit-based tag"
+  value       = var.enable_cpp_api_build ? "${var.artifact_registry_location}-docker.pkg.dev/${var.project_id}/${var.repository_id}/cpp-api:${local.image_tag}" : ""
 }
 
 output "frontend_image_url" {
-  description = "URL of the built Frontend Docker image"
-  value       = var.enable_frontend_build ? "${var.artifact_registry_location}-docker.pkg.dev/${var.project_id}/${var.repository_id}/frontend:latest" : ""
+  description = "URL of the built Frontend Docker image with commit-based tag"
+  value       = var.enable_frontend_build ? "${var.artifact_registry_location}-docker.pkg.dev/${var.project_id}/${var.repository_id}/frontend:${local.image_tag}" : ""
+}
+
+output "image_tag" {
+  description = "The image tag used for Docker images (derived from git_ref)"
+  value       = local.image_tag
 }
