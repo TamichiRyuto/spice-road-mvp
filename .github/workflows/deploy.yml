@@ -87,7 +87,7 @@ jobs:
         echo "Health check: $API_URL/health"
         echo "Metrics: $API_URL/metrics"
         echo "API endpoint: $API_URL/api/shops"
-        echo "FRONTEND_URL=$FRONTEND_URL" >> $GITHUB_OUTPUT
+        echo "Frontend deployed at: $FRONTEND_URL"
 
     outputs:
       api_url: ${{ steps.get-api-url.outputs.API_URL }}
