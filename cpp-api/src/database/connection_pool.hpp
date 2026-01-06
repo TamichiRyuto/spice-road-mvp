@@ -26,17 +26,20 @@ struct DatabaseConfig {
     std::string connection_string() const;
 };
 
+// Forward declaration
+class ConnectionPool;
+
 // RAII ラッパーでPostgreSQL接続を管理
 class Connection {
 public:
-    explicit Connection(std::unique_ptr<pqxx::connection> conn);
-    ~Connection() = default;
+    Connection(std::unique_ptr<pqxx::connection> conn, ConnectionPool* pool);
+    ~Connection();
 
     // コピー禁止、ムーブ可能
     Connection(const Connection&) = delete;
     Connection& operator=(const Connection&) = delete;
-    Connection(Connection&&) noexcept = default;
-    Connection& operator=(Connection&&) noexcept = default;
+    Connection(Connection&&) noexcept;
+    Connection& operator=(Connection&&) noexcept;
 
     // クエリ実行
     std::expected<pqxx::result, std::string> execute(const std::string& query);
@@ -52,6 +55,7 @@ public:
 
 private:
     std::unique_ptr<pqxx::connection> conn_;
+    ConnectionPool* pool_;
 };
 
 // コネクションプール

@@ -39,8 +39,31 @@ std::string DatabaseConfig::connection_string() const {
 }
 
 // Connection implementation
-Connection::Connection(std::unique_ptr<pqxx::connection> conn)
-    : conn_(std::move(conn)) {}
+Connection::Connection(std::unique_ptr<pqxx::connection> conn, ConnectionPool* pool)
+    : conn_(std::move(conn)), pool_(pool) {}
+
+Connection::~Connection() {
+    if (conn_ && pool_) {
+        pool_->release(std::move(conn_));
+    }
+}
+
+Connection::Connection(Connection&& other) noexcept
+    : conn_(std::move(other.conn_)), pool_(other.pool_) {
+    other.pool_ = nullptr;
+}
+
+Connection& Connection::operator=(Connection&& other) noexcept {
+    if (this != &other) {
+        if (conn_ && pool_) {
+            pool_->release(std::move(conn_));
+        }
+        conn_ = std::move(other.conn_);
+        pool_ = other.pool_;
+        other.pool_ = nullptr;
+    }
+    return *this;
+}
 
 std::expected<pqxx::result, std::string> Connection::execute(const std::string& query) {
     try {
@@ -187,7 +210,7 @@ std::expected<Connection, std::string> ConnectionPool::acquire(
         return std::unexpected("Retrieved connection is not open");
     }
 
-    return Connection(std::move(conn));
+    return Connection(std::move(conn), this);
 }
 
 void ConnectionPool::release(std::unique_ptr<pqxx::connection> conn) {
