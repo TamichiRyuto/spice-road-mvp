@@ -90,10 +90,8 @@ RUN chmod +x /app/init-db.sh
 # Set ownership
 RUN chown -R appuser:appuser /app
 
-# nginx needs to write to log files
-RUN mkdir -p /var/log/nginx && \
-    chown -R appuser:appuser /var/log/nginx && \
-    chown -R appuser:appuser /var/lib/nginx
+# nginx needs to write temp files (logs go to stdout/stderr)
+RUN chown -R appuser:appuser /var/lib/nginx
 
 # Update library cache
 RUN ldconfig
