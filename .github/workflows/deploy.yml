@@ -25,6 +25,7 @@ env:
   TF_VAR_app_name: spice-road-mvp
   TF_VAR_google_maps_api_key: ${{ secrets.GOOGLE_MAPS_API_KEY }}
   TF_VAR_github_repository: ${{ github.repository }}
+  TF_VAR_git_ref: ${{ github.sha }}
   TF_VAR_enable_cloud_build: true
 
 jobs:

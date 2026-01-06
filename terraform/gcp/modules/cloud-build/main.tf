@@ -5,16 +5,10 @@
 # Get current commit hash from git_ref
 # This will trigger rebuilds when the commit hash changes
 locals {
-  # Get the short commit hash (7 characters) for image tagging
-  commit_hash = substr(sha256(var.git_ref), 0, 7)
-
-  # Calculate hash of source directories to detect code changes
-  cpp_api_source_hash  = try(sha256(join("", [for f in fileset("${path.root}/../../cpp-api", "**") : filesha256("${path.root}/../../cpp-api/${f}")])), "initial")
-  frontend_source_hash = try(sha256(join("", [for f in fileset("${path.root}/../../frontend", "**") : filesha256("${path.root}/../../frontend/${f}")])), "initial")
-
-  # Image tags using git_ref (which can be branch name, tag, or commit SHA)
-  # We sanitize it to be a valid Docker tag (alphanumeric, dots, dashes, underscores)
-  image_tag = replace(replace(var.git_ref, "/", "-"), "refs-heads-", "")
+  # Image tags using git_ref (which can be commit SHA, branch name, or tag)
+  # For commit SHAs, we take first 7 characters for shorter tags
+  # For branch names, we sanitize them to be valid Docker tags
+  image_tag = length(var.git_ref) == 40 ? substr(var.git_ref, 0, 7) : replace(replace(var.git_ref, "/", "-"), "refs-heads-", "")
 }
 
 # Build C++ API image using Cloud Build from GitHub
@@ -22,12 +16,8 @@ resource "null_resource" "build_cpp_api" {
   count = var.enable_cpp_api_build ? 1 : 0
 
   triggers = {
-    # Rebuild when git ref changes
+    # Rebuild when git ref (commit SHA) changes
     git_ref = var.git_ref
-    # Rebuild when source code changes (detected by hash)
-    source_hash = local.cpp_api_source_hash
-    # Rebuild when image tag changes
-    image_tag = local.image_tag
   }
 
   provisioner "local-exec" {
@@ -51,12 +41,8 @@ resource "null_resource" "build_frontend" {
   count = var.enable_frontend_build ? 1 : 0
 
   triggers = {
-    # Rebuild when git ref changes
+    # Rebuild when git ref (commit SHA) changes
     git_ref = var.git_ref
-    # Rebuild when source code changes (detected by hash)
-    source_hash = local.frontend_source_hash
-    # Rebuild when image tag changes
-    image_tag = local.image_tag
     # Rebuild when build args change
     google_maps_api_key = var.google_maps_api_key
     cpp_api_url = var.cpp_api_url
