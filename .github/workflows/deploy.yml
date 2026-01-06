@@ -63,6 +63,7 @@ jobs:
         cd terraform/gcp
         terraform plan \
           -target=module.artifact_registry \
+          -target=module.cloud_sql \
           -target=module.cloud_build \
           -target=module.cloud_run_cpp_api \
           -target=module.cloud_run_frontend
@@ -72,6 +73,7 @@ jobs:
         cd terraform/gcp
         terraform apply -auto-approve \
           -target=module.artifact_registry \
+          -target=module.cloud_sql \
           -target=module.cloud_build \
           -target=module.cloud_run_cpp_api \
           -target=module.cloud_run_frontend

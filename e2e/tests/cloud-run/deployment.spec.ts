@@ -24,7 +24,7 @@ test.describe('Cloud Run Deployment Validation', () => {
     expect(page.url()).toBeTruthy();
     expect(page.url()).toMatch(/https?:\/\//);
 
-    await expect(page).toHaveTitle(/Spice Road|カレー|Curry/i);
+    await expect(page).toHaveTitle(/スパイスロード|Spice Road|カレー|Curry/i);
     console.log('Frontend URL:', page.url());
   });
 

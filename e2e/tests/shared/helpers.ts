@@ -111,20 +111,35 @@ export async function waitForNetworkIdle(page: Page, timeout: number = 2000) {
 
 /**
  * Collect console errors during test execution
+ * Filters out expected errors like Geolocation permission denials
  */
 export class ConsoleErrorCollector {
   private errors: string[] = [];
+  private expectedErrorPatterns = [
+    /Geolocation error/i,
+    /Geolocation full error/i,
+    /X-Frame-Options may only be set via an HTTP header/i,
+  ];
 
   constructor(page: Page) {
     page.on('console', (msg) => {
       if (msg.type() === 'error') {
-        this.errors.push(msg.text());
+        const errorText = msg.text();
+        if (!this.isExpectedError(errorText)) {
+          this.errors.push(errorText);
+        }
       }
     });
 
     page.on('pageerror', (error) => {
-      this.errors.push(error.message);
+      if (!this.isExpectedError(error.message)) {
+        this.errors.push(error.message);
+      }
     });
+  }
+
+  private isExpectedError(errorText: string): boolean {
+    return this.expectedErrorPatterns.some(pattern => pattern.test(errorText));
   }
 
   getErrors(): string[] {

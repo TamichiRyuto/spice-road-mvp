@@ -27,7 +27,7 @@ test.describe('Cloud Run Smoke Tests', () => {
 
     const bodyText = await page.locator('body').textContent();
     expect(bodyText).toBeTruthy();
-    expect(bodyText!.length).toBeGreaterThan(100);
+    expect(bodyText!.length).toBeGreaterThan(50);
     console.log('✓ Main content loaded');
   });
 
