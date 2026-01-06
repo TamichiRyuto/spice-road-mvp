@@ -7,15 +7,6 @@ export const API_ENDPOINTS = {
   USER_REGISTER: `${API_BASE_URL}/api/users/register`,
 } as const;
 
-export const GEOLOCATION_CONFIG = {
-  enableHighAccuracy: true,
-  timeout: 30000, // GPS取得に十分な時間を確保
-  maximumAge: 0, // 常に最新の位置情報を取得（キャッシュを使わない）
-  watchPosition: true,
-  distanceThreshold: 10, // 10m移動したら更新
-  updateInterval: 60000, // 60秒間隔で最大チェック
-} as const;
-
 export const UI_CONFIG = {
   SCROLL_DELAY: 100,
   ANIMATION_DURATION: 300,

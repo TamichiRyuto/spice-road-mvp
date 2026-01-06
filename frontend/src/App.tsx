@@ -28,11 +28,9 @@ import UserRegistrationForm from './components/UserRegistrationForm';
 import SearchBar from './components/SearchBar';
 import UserProfileCard from './components/UserProfileCard';
 import FilterBar from './components/FilterBar';
-import LocationIndicator from './components/LocationIndicator';
 import SpiceQuadrantMap from './components/SpiceQuadrantMap';
-import useGeolocation from './hooks/useGeolocation';
 import { CurryShop, UserRegistration, PublicUser, User } from './types';
-import { API_ENDPOINTS, GEOLOCATION_CONFIG, UI_CONFIG, FALLBACK_SHOPS } from './config/appConfig';
+import { API_ENDPOINTS, UI_CONFIG, FALLBACK_SHOPS } from './config/appConfig';
 
 function App() {
   const theme = useTheme();
@@ -65,15 +63,6 @@ function App() {
   const [filteredShops, setFilteredShops] = useState<CurryShop[]>([]);
   const [selectedShop, setSelectedShop] = useState<CurryShop | null>(null);
   const [loading, setLoading] = useState(true);
-  // Use the custom geolocation hook
-  const {
-    location: userLocation,
-    refreshLocation,
-    isLoading: locationLoading,
-    error: locationError,
-    accuracy: locationAccuracy,
-    lastUpdated: locationLastUpdated
-  } = useGeolocation(GEOLOCATION_CONFIG);
 
   const shopListRef = useRef<HTMLDivElement>(null);
   
@@ -436,28 +425,16 @@ function App() {
               <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 3 }}>
                 {/* Map Section */}
                 <Paper elevation={2} sx={{ p: 2.5, borderRadius: 2 }}>
-                  <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
-                    <Stack direction="row" alignItems="center" spacing={1}>
-                      <LocationOnIcon color="primary" sx={{ fontSize: '2rem' }} />
-                      <Typography variant="h6" component="h2" fontWeight={700}>
-                        店舗位置マップ
-                      </Typography>
-                    </Stack>
-                    <LocationIndicator
-                      isLoading={locationLoading}
-                      hasLocation={!!userLocation}
-                      error={locationError}
-                      accuracy={locationAccuracy}
-                      lastUpdated={locationLastUpdated}
-                      size="small"
-                    />
+                  <Stack direction="row" alignItems="center" spacing={1} mb={2}>
+                    <LocationOnIcon color="primary" sx={{ fontSize: '2rem' }} />
+                    <Typography variant="h6" component="h2" fontWeight={700}>
+                      店舗位置マップ
+                    </Typography>
                   </Stack>
                   <GoogleMap
                     shops={filteredShops}
                     onShopSelect={handleShopSelect}
                     selectedShop={selectedShop}
-                    userLocation={userLocation}
-                    onCenterOnLocation={refreshLocation}
                   />
                 </Paper>
 

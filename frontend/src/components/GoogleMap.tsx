@@ -7,8 +7,6 @@ interface GoogleMapProps {
   shops: CurryShop[];
   onShopSelect: (shop: CurryShop) => void;
   selectedShop: CurryShop | null;
-  userLocation?: {lat: number, lng: number} | null;
-  onCenterOnLocation?: () => void;
 }
 
 const DEFAULT_CENTER = { lat: 34.6762, lng: 135.8328 }; // Nara
@@ -39,10 +37,9 @@ const mapOptions: google.maps.MapOptions = {
   ]
 };
 
-const GoogleMap = ({ shops, onShopSelect, selectedShop, userLocation, onCenterOnLocation }: GoogleMapProps) => {
+const GoogleMap = ({ shops, onShopSelect, selectedShop }: GoogleMapProps) => {
   const mapRef = useRef<google.maps.Map | null>(null);
   const [activeMarker, setActiveMarker] = useState<string | null>(null);
-  const [center, setCenter] = useState(userLocation ? { lat: userLocation.lat, lng: userLocation.lng } : DEFAULT_CENTER);
 
   const onLoad = useCallback((map: google.maps.Map) => {
     mapRef.current = map;
@@ -52,15 +49,6 @@ const GoogleMap = ({ shops, onShopSelect, selectedShop, userLocation, onCenterOn
     mapRef.current = null;
   }, []);
 
-  const goToCurrentLocation = () => {
-    if (userLocation && mapRef.current) {
-      mapRef.current.panTo({ lat: userLocation.lat, lng: userLocation.lng });
-      mapRef.current.setZoom(SELECTED_ZOOM);
-    } else if (onCenterOnLocation) {
-      onCenterOnLocation();
-    }
-  };
-
   useEffect(() => {
     if (selectedShop && mapRef.current) {
       mapRef.current.panTo({ lat: selectedShop.latitude, lng: selectedShop.longitude });
@@ -68,12 +56,6 @@ const GoogleMap = ({ shops, onShopSelect, selectedShop, userLocation, onCenterOn
       setActiveMarker(selectedShop.id);
     }
   }, [selectedShop]);
-
-  useEffect(() => {
-    if (userLocation) {
-      setCenter({ lat: userLocation.lat, lng: userLocation.lng });
-    }
-  }, [userLocation]);
 
   const handleMarkerClick = (shop: CurryShop) => {
     setActiveMarker(shop.id);
@@ -84,7 +66,7 @@ const GoogleMap = ({ shops, onShopSelect, selectedShop, userLocation, onCenterOn
     <div className="map-wrapper">
       <GoogleMapReact
         mapContainerStyle={mapContainerStyle}
-        center={center}
+        center={DEFAULT_CENTER}
         zoom={DEFAULT_ZOOM}
         onLoad={onLoad}
         onUnmount={onUnmount}
@@ -119,43 +101,7 @@ const GoogleMap = ({ shops, onShopSelect, selectedShop, userLocation, onCenterOn
             )}
           </Marker>
         ))}
-
-        {/* User Location Marker */}
-        {userLocation && (
-          <Marker
-            position={{ lat: userLocation.lat, lng: userLocation.lng }}
-            icon={{
-              path: google.maps.SymbolPath.CIRCLE,
-              fillColor: '#10b981',
-              fillOpacity: 1,
-              strokeColor: '#ffffff',
-              strokeWeight: 3,
-              scale: 10,
-            }}
-            title="現在地"
-          />
-        )}
       </GoogleMapReact>
-
-      <button
-        onClick={goToCurrentLocation}
-        className={`location-btn ${!userLocation ? 'disabled' : ''}`}
-        title={userLocation ? "現在地に移動" : "現在地を取得して移動"}
-        aria-label={userLocation ? "現在地に移動" : "現在地を取得して移動"}
-      >
-        <svg
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke={userLocation ? "#d2691e" : "#8b4513"}
-          strokeWidth="2.5"
-        >
-          <circle cx="12" cy="12" r="10"/>
-          <circle cx="12" cy="12" r="3"/>
-          <path d="M12 1v6m0 6v6M6 12h6m6 0h-6"/>
-        </svg>
-      </button>
     </div>
   );
 };
